@@ -243,7 +243,8 @@ async function main() {
   for (const [key, value] of settings) insertSetting.run(key, value);
   console.log('✅ Site settings seeded.');
 
-  // ── 5b. Seed partners ──
+  // ── 5b. Seed partners (only if none exist) ──
+  const partnerCount = (db.prepare('SELECT COUNT(*) as c FROM partners').get() as { c: number }).c;
   const WP04 = 'https://www.gallopliftparts.com/wp-content/uploads/2024/04';
   const WP11 = 'https://www.gallopliftparts.com/wp-content/uploads/2024/11';
   const defaultPartners = [
@@ -268,11 +269,15 @@ async function main() {
     ['DSK', `${WP04}/DSK.png`, 19],
     ['BST', `${WP04}/BST.png`, 20],
   ];
-  const insertPartner = db.prepare('INSERT INTO partners (id, name, logo, sort_order) VALUES (?, ?, ?, ?)');
-  for (const [name, logo, order] of defaultPartners) {
-    insertPartner.run(uuid(), name as string, logo as string, order as number);
+  if (partnerCount === 0) {
+    const insertPartner = db.prepare('INSERT INTO partners (id, name, logo, sort_order) VALUES (?, ?, ?, ?)');
+    for (const [name, logo, order] of defaultPartners) {
+      insertPartner.run(uuid(), name as string, logo as string, order as number);
+    }
+    console.log(`✅ ${defaultPartners.length} partners seeded.`);
+  } else {
+    console.log(`⏭️  Partners already exist (${partnerCount}), skipping.`);
   }
-  console.log(`✅ ${defaultPartners.length} partners seeded.`);
 
   // ── 6. Build categories from WP product data ──
   // Descriptions for categories
