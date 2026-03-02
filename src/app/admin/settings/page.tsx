@@ -49,11 +49,10 @@ export default function AdminSettingsPage() {
       });
       const data = await res.json();
       if (res.ok) {
-        const d = await res.json();
         if (action === 'clear') {
-          setMockMsg(`Cleared ${d.deleted.pageViews} page views + ${d.deleted.inquiries} inquiries.`);
+          setMockMsg(`Cleared ${data.deleted.pageViews} page views + ${data.deleted.inquiries} inquiries.`);
         } else {
-          setMockMsg(`Generated ${d.generated.pageViews.toLocaleString()} page views + ${d.generated.inquiries} inquiries.`);
+          setMockMsg(`Generated ${data.generated.pageViews.toLocaleString()} page views + ${data.generated.inquiries} inquiries.`);
         }
         fetchMockStats();
       } else {
