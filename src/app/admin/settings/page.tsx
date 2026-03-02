@@ -4,9 +4,10 @@ import { useEffect, useState, useCallback } from 'react';
 
 export default function AdminSettingsPage() {
   /* --- Mock data state --- */
-  const [mockCount, setMockCount] = useState(0);
-  const [realCount, setRealCount] = useState(0);
-  const [totalCount, setTotalCount] = useState(0);
+  const [pvMock, setPvMock] = useState(0);
+  const [pvReal, setPvReal] = useState(0);
+  const [inqMock, setInqMock] = useState(0);
+  const [inqReal, setInqReal] = useState(0);
   const [mockLoading, setMockLoading] = useState(false);
   const [mockMsg, setMockMsg] = useState('');
 
@@ -26,9 +27,10 @@ export default function AdminSettingsPage() {
       const res = await fetch('/api/admin/mock-data', { headers: { Authorization: `Bearer ${token}` } });
       if (res.ok) {
         const data = await res.json();
-        setMockCount(data.mockCount);
-        setRealCount(data.realCount);
-        setTotalCount(data.totalCount);
+        setPvMock(data.pageViews.mock);
+        setPvReal(data.pageViews.real);
+        setInqMock(data.inquiries.mock);
+        setInqReal(data.inquiries.real);
       }
     } catch { /* ignore */ }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -47,7 +49,12 @@ export default function AdminSettingsPage() {
       });
       const data = await res.json();
       if (res.ok) {
-        setMockMsg(action === 'clear' ? `Cleared ${data.deleted} mock records.` : `Generated ${data.generated} mock records.`);
+        const d = await res.json();
+        if (action === 'clear') {
+          setMockMsg(`Cleared ${d.deleted.pageViews} page views + ${d.deleted.inquiries} inquiries.`);
+        } else {
+          setMockMsg(`Generated ${d.generated.pageViews.toLocaleString()} page views + ${d.generated.inquiries} inquiries.`);
+        }
         fetchMockStats();
       } else {
         setMockMsg(data.error || 'Operation failed.');
@@ -98,20 +105,25 @@ export default function AdminSettingsPage() {
         </div>
         <div className="px-6 py-5 space-y-5">
           {/* Stats */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-gray-50 rounded-xl p-4 text-center">
-              <p className="text-2xl font-bold text-gray-900">{totalCount.toLocaleString()}</p>
-              <p className="text-xs text-gray-500 mt-1">Total Records</p>
+              <p className="text-2xl font-bold text-gray-900">{(pvMock + pvReal).toLocaleString()}</p>
+              <p className="text-xs text-gray-500 mt-1">Page Views Total</p>
             </div>
             <div className="bg-orange-50 rounded-xl p-4 text-center">
-              <p className="text-2xl font-bold text-orange-600">{mockCount.toLocaleString()}</p>
-              <p className="text-xs text-gray-500 mt-1">Mock Data</p>
+              <p className="text-2xl font-bold text-orange-600">{pvMock.toLocaleString()}</p>
+              <p className="text-xs text-gray-500 mt-1">Page Views Mock</p>
             </div>
-            <div className="bg-green-50 rounded-xl p-4 text-center">
-              <p className="text-2xl font-bold text-green-600">{realCount.toLocaleString()}</p>
-              <p className="text-xs text-gray-500 mt-1">Real Data</p>
+            <div className="bg-gray-50 rounded-xl p-4 text-center">
+              <p className="text-2xl font-bold text-gray-900">{(inqMock + inqReal).toLocaleString()}</p>
+              <p className="text-xs text-gray-500 mt-1">Inquiries Total</p>
+            </div>
+            <div className="bg-orange-50 rounded-xl p-4 text-center">
+              <p className="text-2xl font-bold text-orange-600">{inqMock.toLocaleString()}</p>
+              <p className="text-xs text-gray-500 mt-1">Inquiries Mock</p>
             </div>
           </div>
+          <p className="text-xs text-gray-400">Real data: {pvReal.toLocaleString()} page views, {inqReal.toLocaleString()} inquiries — these are <strong>never</strong> deleted.</p>
 
           {/* Info box */}
           <div className="bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 text-xs text-blue-700 flex items-start gap-2">
@@ -120,7 +132,7 @@ export default function AdminSettingsPage() {
             </svg>
             <div>
               <p className="font-medium">How it works</p>
-              <p className="mt-0.5">Mock data is tagged separately from real visitor data. Clearing mock data will <strong>only</strong> remove demo records — real traffic data from actual visitors is never affected.</p>
+              <p className="mt-0.5">Mock data is tagged separately from real data. Clearing mock data will <strong>only</strong> remove demo records — real traffic and inquiries from actual visitors are never affected. Generates ~9,000 page views + 35 inquiries.</p>
             </div>
           </div>
 
@@ -138,17 +150,17 @@ export default function AdminSettingsPage() {
             </button>
             <button
               onClick={() => {
-                if (window.confirm(`Are you sure you want to delete ${mockCount.toLocaleString()} mock records? Real data will not be affected.`)) {
+                if (window.confirm(`Are you sure you want to delete ${pvMock.toLocaleString()} mock page views and ${inqMock.toLocaleString()} mock inquiries? Real data will not be affected.`)) {
                   handleMockAction('clear');
                 }
               }}
-              disabled={mockLoading || mockCount === 0}
+              disabled={mockLoading || (pvMock === 0 && inqMock === 0)}
               className="inline-flex items-center gap-2 px-4 py-2 bg-white text-red-600 text-sm font-medium rounded-lg border border-red-200 hover:bg-red-50 transition-colors disabled:opacity-50"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
               </svg>
-              Clear Mock Data ({mockCount.toLocaleString()})
+              Clear Mock Data ({(pvMock + inqMock).toLocaleString()})
             </button>
           </div>
 

@@ -81,6 +81,7 @@ function initializeDb(db: Database.Database) {
       company TEXT DEFAULT '',
       message TEXT DEFAULT '',
       status TEXT DEFAULT 'new',
+      is_mock INTEGER DEFAULT 0,
       created_at TEXT DEFAULT (datetime('now')),
       FOREIGN KEY (product_id) REFERENCES products(id)
     );
@@ -133,6 +134,13 @@ function initializeDb(db: Database.Database) {
     db.prepare('SELECT is_mock FROM page_views LIMIT 1').get();
   } catch {
     db.exec('ALTER TABLE page_views ADD COLUMN is_mock INTEGER DEFAULT 0');
+  }
+
+  // Migration: add is_mock to inquiries if missing
+  try {
+    db.prepare('SELECT is_mock FROM inquiries LIMIT 1').get();
+  } catch {
+    db.exec('ALTER TABLE inquiries ADD COLUMN is_mock INTEGER DEFAULT 0');
   }
 
   // Migration: add must_change_password column if missing
