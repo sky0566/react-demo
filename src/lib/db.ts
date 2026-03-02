@@ -89,6 +89,7 @@ function initializeDb(db: Database.Database) {
       id TEXT PRIMARY KEY,
       username TEXT NOT NULL UNIQUE,
       password_hash TEXT NOT NULL,
+      must_change_password INTEGER DEFAULT 1,
       created_at TEXT DEFAULT (datetime('now'))
     );
 
@@ -119,12 +120,27 @@ function initializeDb(db: Database.Database) {
       browser TEXT DEFAULT '',
       os TEXT DEFAULT '',
       device TEXT DEFAULT '',
+      is_mock INTEGER DEFAULT 0,
       created_at TEXT DEFAULT (datetime('now'))
     );
 
     CREATE INDEX IF NOT EXISTS idx_page_views_created_at ON page_views(created_at);
     CREATE INDEX IF NOT EXISTS idx_page_views_page_path ON page_views(page_path);
   `);
+
+  // Migration: add is_mock column if missing (for existing databases)
+  try {
+    db.prepare('SELECT is_mock FROM page_views LIMIT 1').get();
+  } catch {
+    db.exec('ALTER TABLE page_views ADD COLUMN is_mock INTEGER DEFAULT 0');
+  }
+
+  // Migration: add must_change_password column if missing
+  try {
+    db.prepare('SELECT must_change_password FROM admin_users LIMIT 1').get();
+  } catch {
+    db.exec('ALTER TABLE admin_users ADD COLUMN must_change_password INTEGER DEFAULT 1');
+  }
 
   // Seed default categories if none exist
   const count = db.prepare('SELECT COUNT(*) as c FROM categories').get() as { c: number };
@@ -202,7 +218,7 @@ function initializeDb(db: Database.Database) {
     const countries = ['United States', 'China', 'Germany', 'United Kingdom', 'India', 'Japan', 'Brazil', 'Australia', 'Canada', 'France'];
     const referrers = ['https://www.google.com', 'https://www.bing.com', 'https://www.baidu.com', '', 'direct', 'https://www.facebook.com'];
     const insertPv = db.prepare(
-      'INSERT INTO page_views (page_path, page_title, referrer, ip_hash, country, browser, os, device, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+      'INSERT INTO page_views (page_path, page_title, referrer, ip_hash, country, browser, os, device, is_mock, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?)'
     );
     const seedPvs = db.transaction(() => {
       const now = new Date();

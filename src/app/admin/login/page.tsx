@@ -26,7 +26,11 @@ export default function AdminLoginPage() {
 
       if (res.ok) {
         localStorage.setItem('admin_token', data.token);
-        router.push('/admin');
+        if (data.mustChangePassword) {
+          router.push('/admin/settings');
+        } else {
+          router.push('/admin');
+        }
       } else {
         setError(data.error || 'Login failed');
       }
@@ -91,9 +95,7 @@ export default function AdminLoginPage() {
           </button>
         </form>
 
-        <p className="text-center text-xs text-gray-400 mt-6">
-          Default: admin / admin123
-        </p>
+
       </div>
     </div>
   );
