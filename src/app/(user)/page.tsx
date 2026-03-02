@@ -74,8 +74,8 @@ const features = [
 ];
 
 const categories = [
-  { name: 'Elevator', slug: 'elevator', count: 43, image: 'https://www.gallopliftparts.com/wp-content/uploads/2024/04/selcom-door.jpg' },
-  { name: 'Escalator', slug: 'escalator', count: 15, image: 'https://www.gallopliftparts.com/wp-content/uploads/2024/05/escalator-step-7.png' },
+  { name: 'Elevator', slug: 'elevator', count: 43, image: 'https://www.gallopliftparts.com/wp-content/uploads/2024/04/selcom-door.jpg', featured: false },
+  { name: 'Escalator', slug: 'escalator', count: 15, image: 'https://www.gallopliftparts.com/wp-content/uploads/2024/05/escalator-step-7.png', featured: true },
   { name: 'Selcom', slug: 'selcom', count: 30, image: 'https://www.gallopliftparts.com/wp-content/uploads/2024/04/selcom-landing-door-right.jpg' },
   { name: 'Fermator', slug: 'fermator', count: 31, image: 'https://www.gallopliftparts.com/wp-content/uploads/2024/04/door-controller-vf4.png' },
   { name: 'Kone', slug: 'kone', count: 11, image: 'https://www.gallopliftparts.com/wp-content/uploads/2024/04/KM601370-1.webp' },
@@ -165,8 +165,17 @@ export default function HomePage() {
               <Link
                 key={cat.slug}
                 href={`/products/${cat.slug}`}
-                className="group bg-white border border-[#e2e5e7] overflow-hidden hover:shadow-lg transition-all"
+                className={`group overflow-hidden hover:shadow-lg transition-all relative ${
+                  cat.featured
+                    ? 'bg-gradient-to-br from-[#2B6CB0]/5 to-[#0891b2]/5 border-2 border-[#2B6CB0] ring-2 ring-[#2B6CB0]/20 shadow-md'
+                    : 'bg-white border border-[#e2e5e7]'
+                }`}
               >
+                {cat.featured && (
+                  <div className="absolute top-2 right-2 z-10 bg-gradient-to-r from-[#2B6CB0] to-[#0891b2] text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shadow">
+                    Hot
+                  </div>
+                )}
                 <div className="aspect-square bg-white relative overflow-hidden">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
@@ -176,9 +185,15 @@ export default function HomePage() {
                     loading="lazy"
                   />
                 </div>
-                <div className="p-3 text-center border-t border-[#e2e5e7]">
-                  <h3 className="font-medium text-[16px] text-[#222] group-hover:text-[#046db1] transition-colors">{cat.name}</h3>
-                  <p className="text-[13px] text-[#666] mt-1">{cat.count} products</p>
+                <div className={`p-3 text-center border-t ${
+                  cat.featured ? 'border-[#2B6CB0]/20 bg-gradient-to-r from-[#2B6CB0] to-[#0891b2]' : 'border-[#e2e5e7]'
+                }`}>
+                  <h3 className={`font-medium text-[16px] transition-colors ${
+                    cat.featured ? 'text-white font-semibold' : 'text-[#222] group-hover:text-[#046db1]'
+                  }`}>{cat.name}</h3>
+                  <p className={`text-[13px] mt-1 ${
+                    cat.featured ? 'text-white/80' : 'text-[#666]'
+                  }`}>{cat.count} products</p>
                 </div>
               </Link>
             ))}

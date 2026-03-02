@@ -20,15 +20,27 @@ export default function AdminInquiriesPage() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
 
   const fetchInquiries = useCallback(async () => {
     setLoading(true);
-    const res = await fetch(`/api/inquiries?page=${page}&limit=20`);
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: '20',
+      ...(search ? { search } : {}),
+      ...(statusFilter ? { status: statusFilter } : {}),
+      ...(dateFrom ? { date_from: dateFrom } : {}),
+      ...(dateTo ? { date_to: dateTo } : {}),
+    });
+    const res = await fetch(`/api/inquiries?${params}`);
     const data = await res.json();
     setInquiries(data.inquiries || []);
     setTotal(data.pagination?.total || 0);
     setLoading(false);
-  }, [page]);
+  }, [page, search, statusFilter, dateFrom, dateTo]);
 
   useEffect(() => {
     fetchInquiries();
@@ -36,7 +48,58 @@ export default function AdminInquiriesPage() {
 
   return (
     <div>
-      <div className="mb-6">
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-3 mb-6">
+        <input
+          type="text"
+          placeholder="Search name, email, company..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && fetchInquiries()}
+          className="px-4 py-2 border rounded-lg text-sm w-56"
+        />
+        <select
+          value={statusFilter}
+          onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
+          className="px-3 py-2 border rounded-lg text-sm"
+        >
+          <option value="">All Status</option>
+          <option value="new">New</option>
+          <option value="read">Read</option>
+          <option value="replied">Replied</option>
+        </select>
+        <div className="flex items-center gap-2 text-sm text-gray-500">
+          <span>From</span>
+          <input
+            type="date"
+            value={dateFrom}
+            onChange={(e) => { setDateFrom(e.target.value); setPage(1); }}
+            className="px-3 py-2 border rounded-lg text-sm"
+          />
+          <span>To</span>
+          <input
+            type="date"
+            value={dateTo}
+            onChange={(e) => { setDateTo(e.target.value); setPage(1); }}
+            className="px-3 py-2 border rounded-lg text-sm"
+          />
+        </div>
+        <button
+          onClick={() => { setPage(1); fetchInquiries(); }}
+          className="px-4 py-2 bg-gray-100 rounded-lg text-sm hover:bg-gray-200"
+        >
+          Search
+        </button>
+        {(search || statusFilter || dateFrom || dateTo) && (
+          <button
+            onClick={() => { setSearch(''); setStatusFilter(''); setDateFrom(''); setDateTo(''); setPage(1); }}
+            className="px-3 py-2 text-sm text-gray-500 hover:text-gray-700"
+          >
+            Clear Filters
+          </button>
+        )}
+      </div>
+      <div className="mb-4">
         <p className="text-sm text-gray-500">{total} total inquiries</p>
       </div>
 

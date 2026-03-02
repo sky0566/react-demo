@@ -27,6 +27,8 @@ export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [pagination, setPagination] = useState<Pagination>({ page: 1, limit: 20, total: 0, totalPages: 0 });
   const [search, setSearch] = useState('');
+  const [filterCategory, setFilterCategory] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -40,6 +42,8 @@ export default function AdminProductsPage() {
         page: String(page),
         limit: '20',
         ...(search ? { search } : {}),
+        ...(filterCategory ? { category_id: filterCategory } : {}),
+        ...(filterStatus ? { status: filterStatus } : {}),
       });
       const res = await fetch(`/api/products?${params}`);
       const data = await res.json();
@@ -50,7 +54,7 @@ export default function AdminProductsPage() {
     } finally {
       setLoading(false);
     }
-  }, [search]);
+  }, [search, filterCategory, filterStatus]);
 
   const fetchCategories = async () => {
     const res = await fetch('/api/categories');
@@ -81,21 +85,48 @@ export default function AdminProductsPage() {
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center flex-wrap gap-3">
           <input
             type="text"
             placeholder="Search by name or SKU..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && fetchProducts()}
-            className="px-4 py-2 border rounded-lg text-sm w-64"
+            className="px-4 py-2 border rounded-lg text-sm w-56"
           />
+          <select
+            value={filterCategory}
+            onChange={(e) => { setFilterCategory(e.target.value); }}
+            className="px-3 py-2 border rounded-lg text-sm"
+          >
+            <option value="">All Categories</option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
+          <select
+            value={filterStatus}
+            onChange={(e) => { setFilterStatus(e.target.value); }}
+            className="px-3 py-2 border rounded-lg text-sm"
+          >
+            <option value="">All Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
           <button
             onClick={() => fetchProducts()}
             className="px-4 py-2 bg-gray-100 rounded-lg text-sm hover:bg-gray-200"
           >
             Search
           </button>
+          {(search || filterCategory || filterStatus) && (
+            <button
+              onClick={() => { setSearch(''); setFilterCategory(''); setFilterStatus(''); }}
+              className="px-3 py-2 text-sm text-gray-500 hover:text-gray-700"
+            >
+              Clear Filters
+            </button>
+          )}
         </div>
         <div className="flex items-center space-x-3">
           <Link

@@ -128,6 +128,8 @@ async function main() {
       tmpDb.exec('DROP TABLE IF EXISTS categories');
       tmpDb.exec('DROP TABLE IF EXISTS admin_users');
       tmpDb.exec('DROP TABLE IF EXISTS site_settings');
+      tmpDb.exec('DROP TABLE IF EXISTS partners');
+      tmpDb.exec('DROP TABLE IF EXISTS page_views');
       tmpDb.close();
       console.log('🗑️  Old tables dropped.');
     }
@@ -203,6 +205,21 @@ async function main() {
       created_at TEXT DEFAULT (datetime('now')),
       updated_at TEXT DEFAULT (datetime('now'))
     );
+    CREATE TABLE IF NOT EXISTS page_views (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      page_path TEXT NOT NULL,
+      page_title TEXT DEFAULT '',
+      referrer TEXT DEFAULT '',
+      user_agent TEXT DEFAULT '',
+      ip_hash TEXT DEFAULT '',
+      country TEXT DEFAULT '',
+      browser TEXT DEFAULT '',
+      os TEXT DEFAULT '',
+      device TEXT DEFAULT '',
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_page_views_created_at ON page_views(created_at);
+    CREATE INDEX IF NOT EXISTS idx_page_views_page_path ON page_views(page_path);
   `);
   console.log('✅ Tables created.');
 
@@ -373,7 +390,7 @@ async function main() {
     { name: 'Ahmed Hassan', email: 'ahmed@example.com', phone: '+966 555 1234', company: 'Saudi Elevators Co.', message: 'We need 50 units of Selcom Door contacts. Please send us a quote with delivery time to Saudi Arabia.', status: 'new' },
     { name: 'Maria Garcia', email: 'maria@example.com', phone: '+34 612 345 678', company: 'Ascensores Madrid', message: 'Looking for Fermator door controllers VF4+ and VVVF5+. Can you ship to Spain?', status: 'new' },
     { name: 'John Smith', email: 'john.smith@example.com', phone: '+1 555 987 6543', company: 'Elevator Solutions LLC', message: 'Interested in bulk order of Kone spare parts - KM601370G04 and KM903370G04. Please provide pricing.', status: 'read' },
-    { name: 'Li Wei', email: 'liwei@example.com', phone: '+86 138 8888 9999', company: '苏州电梯配件有限公司', message: '需要三菱电梯配件 P235720B000G01 系列，请报价并告知发货时间。', status: 'replied' },
+    { name: 'Li Wei', email: 'liwei@example.com', phone: '+86 138 8888 9999', company: 'Suzhou Elevator Parts Co., Ltd.', message: 'Need Mitsubishi elevator parts P235720B000G01 series, please quote and advise delivery time.', status: 'replied' },
     { name: 'Ibrahim Al-Farsi', email: 'ibrahim@example.com', phone: '+971 50 123 4567', company: 'Dubai Lift Parts Trading', message: 'We are interested in being a distributor for your Sword elevator parts in UAE. Please contact us.', status: 'new' },
   ];
 

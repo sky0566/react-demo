@@ -10,6 +10,9 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
     const status = searchParams.get('status');
+    const search = searchParams.get('search');
+    const dateFrom = searchParams.get('date_from');
+    const dateTo = searchParams.get('date_to');
     const offset = (page - 1) * limit;
 
     let where = '1=1';
@@ -18,6 +21,21 @@ export async function GET(request: NextRequest) {
     if (status) {
       where += ' AND i.status = ?';
       params.push(status);
+    }
+
+    if (search) {
+      where += ' AND (i.name LIKE ? OR i.email LIKE ? OR i.company LIKE ? OR i.message LIKE ?)';
+      params.push(`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`);
+    }
+
+    if (dateFrom) {
+      where += ' AND date(i.created_at) >= ?';
+      params.push(dateFrom);
+    }
+
+    if (dateTo) {
+      where += ' AND date(i.created_at) <= ?';
+      params.push(dateTo);
     }
 
     const countResult = db.prepare(

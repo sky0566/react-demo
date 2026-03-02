@@ -107,6 +107,23 @@ function initializeDb(db: Database.Database) {
       created_at TEXT DEFAULT (datetime('now')),
       updated_at TEXT DEFAULT (datetime('now'))
     );
+
+    CREATE TABLE IF NOT EXISTS page_views (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      page_path TEXT NOT NULL,
+      page_title TEXT DEFAULT '',
+      referrer TEXT DEFAULT '',
+      user_agent TEXT DEFAULT '',
+      ip_hash TEXT DEFAULT '',
+      country TEXT DEFAULT '',
+      browser TEXT DEFAULT '',
+      os TEXT DEFAULT '',
+      device TEXT DEFAULT '',
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_page_views_created_at ON page_views(created_at);
+    CREATE INDEX IF NOT EXISTS idx_page_views_page_path ON page_views(page_path);
   `);
 
   // Seed default categories if none exist
@@ -145,42 +162,6 @@ function initializeDb(db: Database.Database) {
     );
   }
 
-  // Seed default partners if none exist
-  const partnerCount = db.prepare('SELECT COUNT(*) as c FROM partners').get() as { c: number };
-  if (partnerCount.c === 0) {
-    const WP04 = 'https://www.gallopliftparts.com/wp-content/uploads/2024/04';
-    const WP11 = 'https://www.gallopliftparts.com/wp-content/uploads/2024/11';
-    const defaultPartners = [
-      ['XIO', `${WP04}/XIO.webp`, 1],
-      ['Selcom', `${WP04}/selcom.png`, 2],
-      ['WECO', `${WP04}/weco.png`, 3],
-      ['STEP', `${WP04}/STEP.png`, 4],
-      ['SJEC', `${WP04}/SJEC.png`, 5],
-      ['SIGMA', `${WP04}/SIGMA.png`, 6],
-      ['Sword', `${WP04}/sword.png`, 7],
-      ['Montanari', `${WP04}/Montanari.png`, 8],
-      ['Monarch', `${WP04}/Monarch.png`, 9],
-      ['Mitsubishi', `${WP04}/MITSUBISHI.png`, 10],
-      ['Kone', `${WP04}/kone.png`, 11],
-      ['Monteferro', `${WP11}/Monteferro.png`, 12],
-      ['Mona Drive', `${WP11}/Mona-drive.png`, 13],
-      ['Hpmont', `${WP11}/Hpmont.png`, 14],
-      ['Savera', `${WP11}/Savera.png`, 15],
-      ['Gustav Wolf', `${WP11}/Gustav-wolf.png`, 16],
-      ['Fermator', `${WP04}/fermator.png`, 17],
-      ['Canny', `${WP04}/canny.png`, 18],
-      ['DSK', `${WP04}/DSK.png`, 19],
-      ['BST', `${WP04}/BST.png`, 20],
-    ];
-    const insertPartner = db.prepare(
-      'INSERT INTO partners (id, name, logo, sort_order) VALUES (?, ?, ?, ?)'
-    );
-    const { v4: uuidv4 } = require('uuid');
-    for (const [name, logo, order] of defaultPartners) {
-      insertPartner.run(uuidv4(), name, logo, order);
-    }
-  }
-
   // Seed default site settings
   const settingsCount = db.prepare('SELECT COUNT(*) as c FROM site_settings').get() as { c: number };
   if (settingsCount.c === 0) {
@@ -198,6 +179,57 @@ function initializeDb(db: Database.Database) {
     for (const [key, value] of settings) {
       insertSetting.run(key, value);
     }
+  }
+
+  // Seed demo page view data for analytics dashboard
+  const pvCount = db.prepare('SELECT COUNT(*) as c FROM page_views').get() as { c: number };
+  if (pvCount.c === 0) {
+    const pages = [
+      ['/', 'Home'],
+      ['/products', 'Products'],
+      ['/products/elevator', 'Elevator Parts'],
+      ['/products/escalator', 'Escalator Parts'],
+      ['/products/selcom', 'Selcom Parts'],
+      ['/products/fermator', 'Fermator Parts'],
+      ['/products/kone', 'Kone Parts'],
+      ['/about', 'About Us'],
+      ['/contact', 'Contact Us'],
+      ['/cart', 'Cart'],
+    ];
+    const browsers = ['Chrome', 'Firefox', 'Safari', 'Edge', 'Opera'];
+    const oses = ['Windows', 'macOS', 'Linux', 'iOS', 'Android'];
+    const devices = ['Desktop', 'Mobile', 'Tablet'];
+    const countries = ['United States', 'China', 'Germany', 'United Kingdom', 'India', 'Japan', 'Brazil', 'Australia', 'Canada', 'France'];
+    const referrers = ['https://www.google.com', 'https://www.bing.com', 'https://www.baidu.com', '', 'direct', 'https://www.facebook.com'];
+    const insertPv = db.prepare(
+      'INSERT INTO page_views (page_path, page_title, referrer, ip_hash, country, browser, os, device, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+    );
+    const seedPvs = db.transaction(() => {
+      const now = new Date();
+      for (let dayOffset = 0; dayOffset < 90; dayOffset++) {
+        const d = new Date(now);
+        d.setDate(d.getDate() - dayOffset);
+        const viewsToday = Math.floor(Math.random() * 150) + 50;
+        for (let v = 0; v < viewsToday; v++) {
+          const page = pages[Math.floor(Math.random() * pages.length)];
+          const hour = Math.floor(Math.random() * 24);
+          const min = Math.floor(Math.random() * 60);
+          d.setHours(hour, min, Math.floor(Math.random() * 60));
+          insertPv.run(
+            page[0],
+            page[1],
+            referrers[Math.floor(Math.random() * referrers.length)],
+            `hash_${Math.floor(Math.random() * 500)}`,
+            countries[Math.floor(Math.random() * countries.length)],
+            browsers[Math.floor(Math.random() * browsers.length)],
+            oses[Math.floor(Math.random() * oses.length)],
+            devices[Math.floor(Math.random() * devices.length)],
+            d.toISOString().replace('T', ' ').slice(0, 19)
+          );
+        }
+      }
+    });
+    seedPvs();
   }
 }
 

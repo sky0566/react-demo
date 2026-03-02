@@ -9,6 +9,8 @@ export async function GET(request: NextRequest) {
     const db = getDb();
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
+    const categoryId = searchParams.get('category_id');
+    const status = searchParams.get('status'); // 'active', 'inactive', or null (all when all=1)
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '15');
     const search = searchParams.get('search');
@@ -19,9 +21,21 @@ export async function GET(request: NextRequest) {
     let where = all ? '1=1' : 'p.is_active = 1';
     const params: (string | number)[] = [];
 
+    // Admin status filter overrides
+    if (all && status === 'active') {
+      where = 'p.is_active = 1';
+    } else if (all && status === 'inactive') {
+      where = 'p.is_active = 0';
+    }
+
     if (category) {
       where += ' AND c.slug = ?';
       params.push(category);
+    }
+
+    if (categoryId) {
+      where += ' AND p.category_id = ?';
+      params.push(categoryId);
     }
 
     if (search) {

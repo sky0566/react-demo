@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
+import { PageTracker } from "@/components/PageTracker";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -79,6 +80,7 @@ export default function RootLayout({
         className={`${poppins.variable} antialiased`}
         style={{ fontFamily: "'Poppins', sans-serif" }}
       >
+        <PageTracker />
         {children}
       </body>
     </html>
