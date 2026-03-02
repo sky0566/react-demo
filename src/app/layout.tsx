@@ -63,6 +63,13 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://www.gallopliftparts.com",
   },
+  icons: {
+    icon: [
+      { url: "/logo-icon.png", sizes: "32x32", type: "image/png" },
+      { url: "/logo-icon.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: [{ url: "/logo-icon.png" }],
+  },
 };
 
 export default function RootLayout({
@@ -73,7 +80,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/logo-icon.png" sizes="32x32" type="image/png" />
+        <link rel="icon" href="/logo-icon.png" sizes="192x192" type="image/png" />
+        <link rel="apple-touch-icon" href="/logo-icon.png" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
       <body
