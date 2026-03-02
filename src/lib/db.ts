@@ -1,19 +1,34 @@
 import Database from 'better-sqlite3';
 import path from 'path';
+import fs from 'fs';
 
-const DB_PATH = path.join(process.cwd(), 'data', 'gallop.db');
+const isVercel = !!process.env.VERCEL;
+
+function getDbPath(): string {
+  const srcPath = path.join(process.cwd(), 'data', 'gallop.db');
+  if (!isVercel) return srcPath;
+
+  // On Vercel, copy DB to /tmp (writable) if not already there
+  const tmpPath = '/tmp/gallop.db';
+  if (!fs.existsSync(tmpPath) && fs.existsSync(srcPath)) {
+    fs.copyFileSync(srcPath, tmpPath);
+  }
+  return tmpPath;
+}
 
 let db: Database.Database;
 
 export function getDb(): Database.Database {
   if (!db) {
-    // Ensure data directory exists
-    const fs = require('fs');
-    const dir = path.dirname(DB_PATH);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
+    const dbPath = getDbPath();
+    // Ensure data directory exists (local dev)
+    if (!isVercel) {
+      const dir = path.dirname(dbPath);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
     }
-    db = new Database(DB_PATH);
+    db = new Database(dbPath);
     db.pragma('journal_mode = WAL');
     initializeDb(db);
   }
