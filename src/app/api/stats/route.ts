@@ -185,6 +185,24 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ data: rows });
     }
 
+    if (type === 'online') {
+      // Visitors active in the last 5 minutes
+      const fiveMinAgo = new Date();
+      fiveMinAgo.setMinutes(fiveMinAgo.getMinutes() - 5);
+      const sinceStr = fiveMinAgo.toISOString().replace('T', ' ').slice(0, 19);
+
+      const online = db.prepare(`
+        SELECT ip_hash, browser, os, device, country, page_path, page_title,
+               MAX(created_at) as last_visit
+        FROM page_views
+        WHERE created_at >= ?
+        GROUP BY ip_hash
+        ORDER BY last_visit DESC
+      `).all(sinceStr) as { ip_hash: string; browser: string; os: string; device: string; country: string; page_path: string; page_title: string; last_visit: string }[];
+
+      return NextResponse.json({ data: online, count: online.length });
+    }
+
     return NextResponse.json({ error: 'Invalid type' }, { status: 400 });
   } catch (error) {
     console.error('Stats API error:', error);

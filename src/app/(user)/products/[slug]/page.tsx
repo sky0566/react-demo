@@ -6,7 +6,7 @@ import ProductCard from '@/components/ProductCard';
 
 interface Props {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; sort?: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -31,11 +31,14 @@ export const dynamic = 'force-dynamic';
 
 export default async function CategoryPage({ params, searchParams }: Props) {
   const { slug } = await params;
-  const { page: pageStr } = await searchParams;
+  const { page: pageStr, sort: sortParam } = await searchParams;
   const db = getDb();
   const category = db.prepare('SELECT * FROM categories WHERE slug = ?').get(slug) as Category | undefined;
 
   if (!category) notFound();
+
+  // Default sort: "hot" (is_featured DESC) for selcom, otherwise "default" (sort_order ASC)
+  const sort = sortParam || (slug === 'selcom' ? 'hot' : 'default');
 
   const page = parseInt(pageStr || '1');
   const limit = 15;
@@ -45,11 +48,16 @@ export default async function CategoryPage({ params, searchParams }: Props) {
     'SELECT COUNT(*) as c FROM products WHERE category_id = ? AND is_active = 1'
   ).get(category.id) as { c: number }).c;
 
+  let orderClause = 'p.sort_order ASC, p.created_at DESC';
+  if (sort === 'hot') orderClause = 'p.is_featured DESC, p.sort_order ASC';
+  else if (sort === 'newest') orderClause = 'p.created_at DESC';
+  else if (sort === 'name') orderClause = 'p.name ASC';
+
   const products = db.prepare(
     `SELECT p.*, c.name as category_name, c.slug as category_slug 
      FROM products p LEFT JOIN categories c ON p.category_id = c.id 
      WHERE p.category_id = ? AND p.is_active = 1 
-     ORDER BY p.sort_order ASC, p.created_at DESC 
+     ORDER BY ${orderClause} 
      LIMIT ? OFFSET ?`
   ).all(category.id, limit, offset) as (Product & { category_name: string; category_slug: string })[];
 
@@ -112,7 +120,30 @@ export default async function CategoryPage({ params, searchParams }: Props) {
           {category.description && (
             <p className="mt-3 text-[#555] text-[16px]">{category.description}</p>
           )}
-          <p className="mt-2 text-[14px] text-[#888]">Showing {total} products</p>
+          <div className="mt-4 flex items-center justify-between flex-wrap gap-3">
+            <p className="text-[14px] text-[#888]">Showing {total} products</p>
+            <div className="flex items-center gap-2 text-[14px]">
+              <span className="text-[#888]">Sort by:</span>
+              {[
+                { label: 'Default', value: 'default' },
+                { label: 'Hot Selling', value: 'hot' },
+                { label: 'Newest', value: 'newest' },
+                { label: 'Name', value: 'name' },
+              ].map((s) => (
+                <Link
+                  key={s.value}
+                  href={`/products/${slug}?sort=${s.value}${page > 1 ? `&page=${page}` : ''}`}
+                  className={`px-3 py-1 rounded-md transition-colors ${
+                    sort === s.value
+                      ? 'bg-[#2B6CB0] text-white'
+                      : 'bg-white text-[#555] border border-[#e2e5e7] hover:border-[#2B6CB0] hover:text-[#2B6CB0]'
+                  }`}
+                >
+                  {s.label}
+                </Link>
+              ))}
+            </div>
+          </div>
         </div>
 
         {products.length === 0 ? (
@@ -135,7 +166,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
               <div className="mt-10 flex justify-center items-center gap-2">
                 {page > 1 && (
                   <Link
-                    href={`/products/${slug}?page=${page - 1}`}
+                    href={`/products/${slug}?sort=${sort}&page=${page - 1}`}
                     className="px-4 py-2 border border-[#e2e5e7] bg-white text-[14px] hover:bg-[#f9f9f9] text-[#222]"
                   >
                     &larr; Previous
@@ -144,7 +175,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
                   <Link
                     key={p}
-                    href={`/products/${slug}?page=${p}`}
+                    href={`/products/${slug}?sort=${sort}&page=${p}`}
                     className={`px-4 py-2 border text-[14px] ${
                       p === page
                         ? 'bg-[#2B6CB0] text-white border-[#2B6CB0]'
@@ -156,7 +187,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
                 ))}
                 {page < totalPages && (
                   <Link
-                    href={`/products/${slug}?page=${page + 1}`}
+                    href={`/products/${slug}?sort=${sort}&page=${page + 1}`}
                     className="px-4 py-2 border border-[#e2e5e7] bg-white text-[14px] hover:bg-[#f9f9f9] text-[#222]"
                   >
                     Next &rarr;

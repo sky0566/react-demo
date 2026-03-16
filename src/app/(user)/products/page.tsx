@@ -85,7 +85,7 @@ export default function ProductsPage() {
               href={`/products/${cat.slug}`}
               className="group product-card flex flex-col"
             >
-              <div className="aspect-square bg-white overflow-hidden">
+              <div className="aspect-square bg-white overflow-hidden relative">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={categoryImages[cat.slug] || '/placeholder-product.svg'}
@@ -93,6 +93,18 @@ export default function ProductsPage() {
                   className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300"
                   loading="lazy"
                 />
+                {/* Brand logo thumbnail */}
+                {cat.logo && (
+                  <div className="absolute top-2 left-2 bg-white/90 backdrop-blur-sm rounded p-1.5 shadow-sm">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={cat.logo}
+                      alt={`${cat.name} logo`}
+                      className="h-6 w-auto object-contain"
+                      loading="lazy"
+                    />
+                  </div>
+                )}
               </div>
               <div className="p-4 text-center border-t border-[#e2e5e7]">
                 <h2 className="text-[16px] font-medium text-[#222] group-hover:text-[#046db1] transition-colors">

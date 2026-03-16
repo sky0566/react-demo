@@ -19,6 +19,11 @@ export default function AdminSettingsPage() {
   const [pwdSuccess, setPwdSuccess] = useState('');
   const [pwdLoading, setPwdLoading] = useState(false);
 
+  /* --- Country blocking state --- */
+  const [blockedCountries, setBlockedCountries] = useState<string[]>([]);
+  const [countryInput, setCountryInput] = useState('');
+  const [blockMsg, setBlockMsg] = useState('');
+
   const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null;
   const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
 
@@ -37,6 +42,50 @@ export default function AdminSettingsPage() {
   }, [token]);
 
   useEffect(() => { fetchMockStats(); }, [fetchMockStats]);
+
+  // Fetch blocked countries
+  const fetchBlockedCountries = useCallback(async () => {
+    try {
+      const res = await fetch('/api/settings');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.blocked_countries) {
+          setBlockedCountries(JSON.parse(data.blocked_countries));
+        }
+      }
+    } catch { /* ignore */ }
+  }, []);
+
+  useEffect(() => { fetchBlockedCountries(); }, [fetchBlockedCountries]);
+
+  const handleAddCountry = async () => {
+    const country = countryInput.trim();
+    if (!country || blockedCountries.includes(country)) return;
+    const updated = [...blockedCountries, country];
+    setBlockedCountries(updated);
+    setCountryInput('');
+    try {
+      await fetch('/api/settings', {
+        method: 'POST', headers,
+        body: JSON.stringify({ key: 'blocked_countries', value: JSON.stringify(updated) }),
+      });
+      setBlockMsg(`Added "${country}" to blocked list.`);
+    } catch { setBlockMsg('Failed to update.'); }
+    setTimeout(() => setBlockMsg(''), 3000);
+  };
+
+  const handleRemoveCountry = async (country: string) => {
+    const updated = blockedCountries.filter(c => c !== country);
+    setBlockedCountries(updated);
+    try {
+      await fetch('/api/settings', {
+        method: 'POST', headers,
+        body: JSON.stringify({ key: 'blocked_countries', value: JSON.stringify(updated) }),
+      });
+      setBlockMsg(`Removed "${country}" from blocked list.`);
+    } catch { setBlockMsg('Failed to update.'); }
+    setTimeout(() => setBlockMsg(''), 3000);
+  };
 
   const handleMockAction = async (action: 'clear' | 'generate') => {
     setMockLoading(true);
@@ -227,6 +276,54 @@ export default function AdminSettingsPage() {
               {pwdLoading ? 'Saving...' : 'Update Password'}
             </button>
           </form>
+        </div>
+      </div>
+
+      {/* ===== Country Blocking ===== */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-50 flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-gray-800">Country Blocking</h2>
+          {blockMsg && <span className="text-xs text-green-600 font-medium">{blockMsg}</span>}
+        </div>
+        <div className="px-6 py-5 space-y-4">
+          <p className="text-sm text-gray-500">
+            Block visitors from specific countries. Uses the <code className="bg-gray-100 px-1.5 py-0.5 rounded text-xs font-mono">x-vercel-ip-country</code> header for detection.
+          </p>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={countryInput}
+              onChange={(e) => setCountryInput(e.target.value.toUpperCase())}
+              placeholder="Country code (e.g. CN, RU, IN)"
+              maxLength={2}
+              className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+              onKeyDown={(e) => e.key === 'Enter' && handleAddCountry()}
+            />
+            <button
+              onClick={handleAddCountry}
+              disabled={!countryInput.trim()}
+              className="px-5 py-2.5 bg-red-600 text-white rounded-xl text-sm font-medium hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              Block
+            </button>
+          </div>
+          {blockedCountries.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {blockedCountries.map((code) => (
+                <span key={code} className="inline-flex items-center gap-1.5 bg-red-50 text-red-700 px-3 py-1.5 rounded-lg text-sm font-medium border border-red-100">
+                  <img src={`https://flagcdn.com/16x12/${code.toLowerCase()}.png`} alt={code} className="w-4 h-3" />
+                  {code}
+                  <button onClick={() => handleRemoveCountry(code)} className="ml-1 text-red-400 hover:text-red-600" title="Unblock">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                </span>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-400 italic">No countries blocked.</p>
+          )}
         </div>
       </div>
 

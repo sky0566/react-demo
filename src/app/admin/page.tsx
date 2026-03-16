@@ -199,6 +199,8 @@ export default function AdminDashboard() {
   const [countryRange, setCountryRange] = useState('30');
   const [visitorRange, setVisitorRange] = useState('7');
   const [referrerRange, setReferrerRange] = useState('30');
+  const [onlineCount, setOnlineCount] = useState(0);
+  const [onlineVisitors, setOnlineVisitors] = useState<{ ip_hash: string; browser: string; os: string; device: string; country: string; page_path: string; page_title: string; last_visit: string }[]>([]);
 
   /* Visitor filters */
   const [vSearch, setVSearch] = useState('');
@@ -243,11 +245,32 @@ export default function AdminDashboard() {
     setReferrers(d.data || []);
   }, [referrerRange]);
 
+  const fetchOnline = useCallback(async () => {
+    const r = await fetch('/api/stats?type=online');
+    const d = await r.json();
+    setOnlineCount(d.count || 0);
+    setOnlineVisitors(d.data || []);
+  }, []);
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  const refreshAll = useCallback(async () => {
+    setRefreshing(true);
+    await Promise.all([fetchOverview(), fetchTraffic(), fetchPages(), fetchBrowsers(), fetchCountries(), fetchVisitors(), fetchReferrers(), fetchOnline()]);
+    setRefreshing(false);
+  }, [fetchOverview, fetchTraffic, fetchPages, fetchBrowsers, fetchCountries, fetchVisitors, fetchReferrers, fetchOnline]);
+
   useEffect(() => {
-    Promise.all([fetchOverview(), fetchTraffic(), fetchPages(), fetchBrowsers(), fetchCountries(), fetchVisitors(), fetchReferrers()])
+    Promise.all([fetchOverview(), fetchTraffic(), fetchPages(), fetchBrowsers(), fetchCountries(), fetchVisitors(), fetchReferrers(), fetchOnline()])
       .finally(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Auto-refresh online count every 30 seconds
+  useEffect(() => {
+    const timer = setInterval(fetchOnline, 30000);
+    return () => clearInterval(timer);
+  }, [fetchOnline]);
 
   useEffect(() => { fetchTraffic(); }, [fetchTraffic]);
   useEffect(() => { fetchPages(); }, [fetchPages]);
@@ -305,6 +328,11 @@ export default function AdminDashboard() {
       gradient: 'from-emerald-500 to-emerald-600',
     },
     {
+      label: 'Online Now', value: onlineCount, live: true,
+      icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5.636 18.364a9 9 0 010-12.728m12.728 0a9 9 0 010 12.728m-9.9-2.829a5 5 0 010-7.07m7.072 0a5 5 0 010 7.07M13 12a1 1 0 11-2 0 1 1 0 012 0z" />,
+      gradient: 'from-rose-500 to-pink-600',
+    },
+    {
       label: 'Total Products', value: overview?.products.total || 0,
       icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />,
       gradient: 'from-violet-500 to-violet-600',
@@ -318,13 +346,30 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-6">
+      {/* ===== Refresh Bar ===== */}
+      <div className="flex items-center justify-end">
+        <button
+          onClick={refreshAll}
+          disabled={refreshing}
+          className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 disabled:opacity-50 shadow-sm transition-all"
+        >
+          <svg className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          {refreshing ? 'Refreshing...' : 'Refresh'}
+        </button>
+      </div>
+
       {/* ===== Stat Cards ===== */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {statCards.map((card) => (
           <div key={card.label} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow">
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">{card.label}</p>
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
+                  {card.label}
+                  {card.live && <span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" /><span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500" /></span>}
+                </p>
                 <p className="text-3xl font-bold text-gray-900 mt-2">{fmt(card.value)}</p>
                 {card.delta !== undefined && (
                   <div className={`flex items-center gap-1 mt-2 text-xs font-medium ${card.delta >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
@@ -507,6 +552,38 @@ export default function AdminDashboard() {
           ) : <p className="text-sm text-gray-400 text-center py-10">No page data</p>}
         </WidgetCard>
       </div>
+
+      {/* ===== Currently Online Visitors ===== */}
+      {onlineVisitors.length > 0 && (
+        <WidgetCard
+          title={`Currently Online (${onlineCount})`}
+          right={
+            <div className="flex items-center gap-1.5 text-xs text-rose-500">
+              <span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" /><span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500" /></span>
+              Live
+            </div>
+          }
+        >
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {onlineVisitors.map((v) => (
+              <div key={v.ip_hash} className="flex items-center gap-3 p-3 rounded-xl bg-gray-50/80 hover:bg-gray-50 transition-colors">
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-rose-400 to-pink-500 flex items-center justify-center text-white text-[10px] font-bold shadow-sm flex-shrink-0">
+                  {v.ip_hash.substring(0, 2).toUpperCase()}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5 text-xs text-gray-700 font-medium">
+                    <CountryFlag country={v.country} size={14} />
+                    <span className="truncate">{v.country || 'Unknown'}</span>
+                  </div>
+                  <p className="text-[11px] text-gray-400 truncate mt-0.5">
+                    {v.page_title || v.page_path} &middot; {v.browser} &middot; {v.device}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </WidgetCard>
+      )}
 
       {/* ===== Most Active Visitors ===== */}
       <WidgetCard title="Recent Active Visitors" right={<RangeTabs value={visitorRange} onChange={setVisitorRange} />}>

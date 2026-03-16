@@ -7,6 +7,8 @@ interface Category {
   name: string;
   slug: string;
   description: string;
+  image: string;
+  logo: string;
   sort_order: number;
   product_count: number;
 }
@@ -16,7 +18,7 @@ export default function AdminCategoriesPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Category | null>(null);
-  const [form, setForm] = useState({ name: '', slug: '', description: '', sort_order: 0 });
+  const [form, setForm] = useState({ name: '', slug: '', description: '', image: '', logo: '', sort_order: 0 });
 
   const fetchCategories = async () => {
     setLoading(true);
@@ -41,7 +43,7 @@ export default function AdminCategoriesPage() {
     });
     setShowForm(false);
     setEditing(null);
-    setForm({ name: '', slug: '', description: '', sort_order: 0 });
+    setForm({ name: '', slug: '', description: '', image: '', logo: '', sort_order: 0 });
     fetchCategories();
   };
 
@@ -53,7 +55,7 @@ export default function AdminCategoriesPage() {
 
   const openEdit = (cat: Category) => {
     setEditing(cat);
-    setForm({ name: cat.name, slug: cat.slug, description: cat.description, sort_order: cat.sort_order });
+    setForm({ name: cat.name, slug: cat.slug, description: cat.description, image: cat.image || '', logo: cat.logo || '', sort_order: cat.sort_order });
     setShowForm(true);
   };
 
@@ -62,7 +64,7 @@ export default function AdminCategoriesPage() {
       <div className="flex items-center justify-between mb-6">
         <p className="text-sm text-gray-500">{categories.length} categories</p>
         <button
-          onClick={() => { setEditing(null); setForm({ name: '', slug: '', description: '', sort_order: 0 }); setShowForm(true); }}
+          onClick={() => { setEditing(null); setForm({ name: '', slug: '', description: '', image: '', logo: '', sort_order: 0 }); setShowForm(true); }}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
         >
           + Add Category
@@ -99,6 +101,30 @@ export default function AdminCategoriesPage() {
               />
             </div>
             <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+              <input
+                type="text" value={form.image}
+                onChange={(e) => setForm({ ...form, image: e.target.value })}
+                className="w-full px-3 py-2 border rounded-lg text-sm"
+                placeholder="Category cover image URL"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Logo URL</label>
+              <div className="flex gap-2">
+                <input
+                  type="text" value={form.logo}
+                  onChange={(e) => setForm({ ...form, logo: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-lg text-sm"
+                  placeholder="Brand logo URL (shown in nav dropdown)"
+                />
+                {form.logo && (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img src={form.logo} alt="preview" className="h-9 w-auto object-contain border rounded p-0.5" />
+                )}
+              </div>
+            </div>
+            <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Sort Order</label>
               <input
                 type="number" value={form.sort_order}
@@ -123,6 +149,7 @@ export default function AdminCategoriesPage() {
           <thead className="bg-gray-50 border-b">
             <tr>
               <th className="text-left px-4 py-3 font-medium text-gray-600">Name</th>
+              <th className="text-left px-4 py-3 font-medium text-gray-600">Logo</th>
               <th className="text-left px-4 py-3 font-medium text-gray-600">Slug</th>
               <th className="text-left px-4 py-3 font-medium text-gray-600">Products</th>
               <th className="text-left px-4 py-3 font-medium text-gray-600">Order</th>
@@ -131,10 +158,18 @@ export default function AdminCategoriesPage() {
           </thead>
           <tbody className="divide-y">
             {loading ? (
-              <tr><td colSpan={5} className="text-center py-8 text-gray-500">Loading...</td></tr>
+              <tr><td colSpan={6} className="text-center py-8 text-gray-500">Loading...</td></tr>
             ) : categories.map((cat) => (
               <tr key={cat.id} className="hover:bg-gray-50">
                 <td className="px-4 py-3 font-medium text-gray-900">{cat.name}</td>
+                <td className="px-4 py-3">
+                  {cat.logo ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img src={cat.logo} alt={cat.name} className="h-6 w-auto object-contain" />
+                  ) : (
+                    <span className="text-xs text-gray-400">—</span>
+                  )}
+                </td>
                 <td className="px-4 py-3 text-gray-600 font-mono text-xs">{cat.slug}</td>
                 <td className="px-4 py-3 text-gray-600">{cat.product_count}</td>
                 <td className="px-4 py-3 text-gray-600">{cat.sort_order}</td>

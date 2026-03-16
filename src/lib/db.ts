@@ -150,6 +150,26 @@ function initializeDb(db: Database.Database) {
     db.exec('ALTER TABLE admin_users ADD COLUMN must_change_password INTEGER DEFAULT 1');
   }
 
+  // Migration: add logo column to categories if missing
+  try {
+    db.prepare('SELECT logo FROM categories LIMIT 1').get();
+  } catch {
+    db.exec("ALTER TABLE categories ADD COLUMN logo TEXT DEFAULT ''");
+    // Seed default brand logos for existing categories
+    const defaultLogos: Record<string, string> = {
+      selcom: 'https://www.gallopliftparts.com/wp-content/uploads/2024/04/selcom.png',
+      fermator: 'https://www.gallopliftparts.com/wp-content/uploads/2024/04/fermator.png',
+      kone: 'https://www.gallopliftparts.com/wp-content/uploads/2024/04/kone.png',
+      sword: 'https://www.gallopliftparts.com/wp-content/uploads/2024/04/sword.png',
+      canny: 'https://www.gallopliftparts.com/wp-content/uploads/2024/04/canny.png',
+      mitsubishi: 'https://www.gallopliftparts.com/wp-content/uploads/2024/04/MITSUBISHI.png',
+    };
+    const updateLogo = db.prepare('UPDATE categories SET logo = ? WHERE slug = ?');
+    for (const [slug, logo] of Object.entries(defaultLogos)) {
+      updateLogo.run(logo, slug);
+    }
+  }
+
   // Seed default categories if none exist
   const count = db.prepare('SELECT COUNT(*) as c FROM categories').get() as { c: number };
   if (count.c === 0) {
@@ -264,6 +284,7 @@ export interface Category {
   slug: string;
   description: string;
   image: string;
+  logo: string;
   parent_id: string | null;
   sort_order: number;
   created_at: string;

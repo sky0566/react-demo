@@ -17,6 +17,7 @@ export async function PUT(
         slug = COALESCE(?, slug),
         description = COALESCE(?, description),
         image = COALESCE(?, image),
+        logo = COALESCE(?, logo),
         sort_order = COALESCE(?, sort_order),
         updated_at = datetime('now')
       WHERE id = ?
@@ -25,6 +26,7 @@ export async function PUT(
       body.slug ?? null,
       body.description ?? null,
       body.image ?? null,
+      body.logo ?? null,
       body.sort_order ?? null,
       id
     );
