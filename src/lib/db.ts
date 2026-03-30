@@ -127,6 +127,20 @@ function initializeDb(db: Database.Database) {
 
     CREATE INDEX IF NOT EXISTS idx_page_views_created_at ON page_views(created_at);
     CREATE INDEX IF NOT EXISTS idx_page_views_page_path ON page_views(page_path);
+
+    CREATE TABLE IF NOT EXISTS news (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      slug TEXT NOT NULL UNIQUE,
+      content TEXT DEFAULT '',
+      excerpt TEXT DEFAULT '',
+      image TEXT DEFAULT '',
+      category TEXT DEFAULT 'News',
+      is_active INTEGER DEFAULT 1,
+      sort_order INTEGER DEFAULT 0,
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now'))
+    );
   `);
 
   // Migration: add is_mock column if missing (for existing databases)
@@ -334,4 +348,18 @@ export interface Inquiry {
   message: string;
   status: string;
   created_at: string;
+}
+
+export interface News {
+  id: string;
+  title: string;
+  slug: string;
+  content: string;
+  excerpt: string;
+  image: string;
+  category: string;
+  is_active: number;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
 }

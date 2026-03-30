@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { getDb, type Product } from '@/lib/db';
 import { parseJsonSafe } from '@/lib/utils';
@@ -130,17 +131,20 @@ export default async function ProductPage({ params }: Props) {
 
       <article className="max-w-[1290px] mx-auto px-6 py-8 lg:py-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-          {/* Image Gallery - matching WooCommerce layout */}
+          {/* Image Gallery */}
           <div>
-            <div className="bg-white border border-[#e2e5e7] overflow-hidden">
+            <div className="overflow-hidden">
               {images.length > 0 ? (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img
-                  src={images[0]}
-                  alt={product.name}
-                  className="w-full object-contain p-6"
-                  style={{ maxHeight: '500px' }}
-                />
+                <div className="relative w-full" style={{ height: '350px' }}>
+                  <Image
+                    src={images[0]}
+                    alt={product.name}
+                    fill
+                    className="object-contain"
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    priority
+                  />
+                </div>
               ) : (
                 <div className="w-full flex items-center justify-center text-[#ccc] p-12" style={{ height: '400px' }}>
                   <svg className="w-24 h-24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -152,9 +156,8 @@ export default async function ProductPage({ params }: Props) {
             {images.length > 1 && (
               <div className="grid grid-cols-4 gap-2 mt-3">
                 {images.slice(0, 4).map((img, idx) => (
-                  <div key={idx} className="bg-white border border-[#e2e5e7] overflow-hidden aspect-square">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={img} alt={`${product.name} - ${idx + 1}`} className="w-full h-full object-contain p-2" />
+                  <div key={idx} className="bg-white overflow-hidden aspect-square relative">
+                    <Image src={img} alt={`${product.name} - ${idx + 1}`} fill className="object-contain" sizes="12vw" />
                   </div>
                 ))}
               </div>
@@ -163,7 +166,7 @@ export default async function ProductPage({ params }: Props) {
 
           {/* Product Details - WooCommerce style */}
           <div>
-            <h1 className="text-[32px] font-[900] text-[#222] leading-tight">{product.name}</h1>
+            <h1 className="text-[24px] font-bold text-[#222] leading-tight">{product.name}</h1>
 
             {product.short_description && (
               <p className="mt-4 text-[#555] text-[16px] leading-relaxed">{product.short_description}</p>
@@ -172,17 +175,17 @@ export default async function ProductPage({ params }: Props) {
             {/* Specifications Table */}
             {Object.keys(specifications).length > 0 && (
               <div className="mt-6">
-                <div className="border border-[#e2e5e7] overflow-hidden">
-                  {Object.entries(specifications).map(([key, value], idx) => (
-                    <div
-                      key={key}
-                      className={`flex justify-between px-4 py-3 text-[15px] ${idx % 2 === 0 ? 'bg-[#f9f9f9]' : 'bg-white'}`}
-                    >
-                      <span className="font-medium text-[#222]">{key}</span>
-                      <span className="text-[#555]">{value}</span>
-                    </div>
-                  ))}
-                </div>
+                <h2 className="text-[18px] font-bold text-[#222] mb-3">Specifications</h2>
+                <table className="w-full border-collapse border border-[#ddd] text-[14px]">
+                  <tbody>
+                    {Object.entries(specifications).map(([key, value], idx) => (
+                      <tr key={key} className={idx % 2 === 0 ? 'bg-[#f9f9f9]' : 'bg-white'}>
+                        <td className="border border-[#ddd] px-4 py-2 font-semibold text-[#333] w-[40%]">{key}</td>
+                        <td className="border border-[#ddd] px-4 py-2 text-[#555]">{value}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             )}
 
@@ -245,17 +248,17 @@ export default async function ProductPage({ params }: Props) {
         {product.description && (
           <div className="mt-12">
             <div className="border-b border-[#e2e5e7]">
-              <span className="inline-block bg-white border border-[#e2e5e7] border-b-white px-5 py-3 text-[15px] font-medium text-[#222] -mb-px">Description</span>
+              <h2 className="inline-block bg-white border border-[#e2e5e7] border-b-white px-5 py-3 text-[15px] font-bold text-[#222] -mb-px">Description</h2>
             </div>
-            <div className="bg-white border border-[#e2e5e7] border-t-0 p-6">
-              <div className="text-[#555] text-[16px] leading-relaxed" dangerouslySetInnerHTML={{ __html: product.description }} />
+            <div className="border border-[#e2e5e7] border-t-0 p-6">
+              <div className="wp-content" dangerouslySetInnerHTML={{ __html: product.description }} />
             </div>
           </div>
         )}
 
         {/* Packing and Shipping section placeholder */}
         <div className="mt-8 bg-white border border-[#e2e5e7] p-6">
-          <h2 className="text-[22px] font-medium text-[#222] mb-4">Packing and Shipping</h2>
+          <h2 className="text-[20px] font-bold text-[#222] mb-4">Packing and Shipping</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {['WORKSHOP', 'PACKING', 'LOADING', 'SHIPPING'].map((step) => (
               <div key={step} className="text-center">
@@ -270,14 +273,14 @@ export default async function ProductPage({ params }: Props) {
 
         {/* Quote Form */}
         <div className="mt-8 bg-white border border-[#e2e5e7] p-6">
-          <h2 className="text-[22px] font-medium text-[#222] mb-4">Request a Quote</h2>
+          <h2 className="text-[20px] font-bold text-[#222] mb-4">Request a Quote</h2>
           <QuoteForm productId={product.id} productName={product.name} />
         </div>
 
         {/* Related Products */}
         {related.length > 0 && (
           <div className="mt-12">
-            <h2 className="text-[22px] font-medium text-[#222] mb-6">Related products</h2>
+            <h2 className="text-[20px] font-bold text-[#222] mb-6">Related Products</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {related.map((p) => (
                 <ProductCard key={p.id} product={p} />

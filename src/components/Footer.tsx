@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 const categories = [
   'Elevator', 'Escalator', 'Selcom', 'Fermator',
@@ -14,28 +15,30 @@ export default function Footer() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             {/* Company Info */}
             <div>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <Image
                 src="https://www.gallopliftparts.com/wp-content/uploads/2024/03/logo-text.png"
                 alt="Gallop Lift Parts"
-                className="h-[80px] mb-5"
+                width={200}
+                height={55}
+                className="h-[55px] mb-5 w-auto"
               />
               <p className="text-[#222] text-[15px] leading-relaxed mb-4">
                 Suzhou Gallop Technology Co., Ltd. is a professional &quot;One-Stop&quot; elevator and
                 escalator solution plan supplier.
               </p>
               {/* Certification image */}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img 
+              <Image 
                 src="https://www.gallopliftparts.com/wp-content/uploads/2024/04/image-4.png" 
                 alt="ISO Certifications" 
-                className="h-[100px] mt-4"
+                width={200}
+                height={60}
+                className="h-[60px] mt-4 w-auto"
               />
             </div>
 
             {/* Products */}
-            <div>
-              <h3 className="text-[#222] font-semibold text-[20px] mb-5">Products</h3>
+            <div className="flex flex-col items-center md:items-start">
+              <h3 className="text-[#222] font-semibold text-[18px] mb-5">Products</h3>
               <ul className="space-y-2">
                 {categories.map((cat) => (
                   <li key={cat}>

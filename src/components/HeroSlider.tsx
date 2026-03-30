@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 
 const slides = [
   {
@@ -37,12 +38,13 @@ export default function HeroSlider() {
           className={`hero-slide ${idx === current ? 'active' : ''}`}
           style={{ position: idx === 0 ? 'relative' : 'absolute' }}
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src={slide.src}
             alt={slide.alt}
-            className="w-full h-full object-cover"
-            loading={idx === 0 ? 'eager' : 'lazy'}
+            fill
+            className="object-cover"
+            priority={idx === 0}
+            sizes="100vw"
           />
         </div>
       ))}

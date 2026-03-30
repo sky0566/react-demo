@@ -2,6 +2,7 @@
 
 import { useCart } from '@/components/CartProvider';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState } from 'react';
 
 export default function CartPage() {
@@ -116,9 +117,8 @@ export default function CartPage() {
           <div className="lg:col-span-2 space-y-3">
             {items.map((item) => (
               <div key={item.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex gap-4">
-                <div className="w-20 h-20 bg-gray-50 rounded-lg overflow-hidden flex-shrink-0">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={item.image || '/placeholder-product.svg'} alt={item.name} className="w-full h-full object-contain p-1" />
+                <div className="w-20 h-20 bg-gray-50 rounded-lg overflow-hidden flex-shrink-0 relative">
+                  <Image src={item.image || '/placeholder-product.svg'} alt={item.name} fill className="object-contain" sizes="80px" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-medium text-[#222] text-[15px] truncate">{item.name}</h3>

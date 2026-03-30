@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import { getDb, type Category } from '@/lib/db';
 
 export const metadata: Metadata = {
@@ -86,22 +87,22 @@ export default function ProductsPage() {
               className="group product-card flex flex-col"
             >
               <div className="aspect-square bg-white overflow-hidden relative">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
                   src={categoryImages[cat.slug] || '/placeholder-product.svg'}
                   alt={cat.name}
-                  className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300"
-                  loading="lazy"
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                 />
                 {/* Brand logo thumbnail */}
                 {cat.logo && (
-                  <div className="absolute top-2 left-2 bg-white/90 backdrop-blur-sm rounded p-1.5 shadow-sm">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
+                  <div className="absolute top-2 left-2 bg-white/90 backdrop-blur-sm rounded p-1.5 shadow-sm z-10">
+                    <Image
                       src={cat.logo}
                       alt={`${cat.name} logo`}
+                      width={48}
+                      height={24}
                       className="h-6 w-auto object-contain"
-                      loading="lazy"
                     />
                   </div>
                 )}

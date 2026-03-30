@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { parseJsonSafe } from '@/lib/utils';
 import AddToCartButton from './AddToCartButton';
 
@@ -23,12 +24,12 @@ export default function ProductCard({ product }: ProductCardProps) {
     <article className="product-card flex flex-col">
       <Link href={`/product/${product.slug}`} className="block">
         <div className="aspect-square bg-white relative overflow-hidden">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src={mainImage}
             alt={product.name}
-            className="w-full h-full object-contain p-3 hover:scale-105 transition-transform duration-300"
-            loading="lazy"
+            fill
+            className="object-cover hover:scale-105 transition-transform duration-300"
+            sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 20vw"
           />
         </div>
       </Link>

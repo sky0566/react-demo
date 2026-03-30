@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import HeroSlider from '@/components/HeroSlider';
 import { getDb } from '@/lib/db';
 
@@ -73,25 +74,31 @@ const features = [
   },
 ];
 
-const categories = [
-  { name: 'Elevator', slug: 'elevator', count: 43, image: 'https://www.gallopliftparts.com/wp-content/uploads/2024/04/selcom-door.jpg', featured: false },
-  { name: 'Escalator', slug: 'escalator', count: 15, image: 'https://www.gallopliftparts.com/wp-content/uploads/2024/05/escalator-step-7.png', featured: true },
-  { name: 'Selcom', slug: 'selcom', count: 30, image: 'https://www.gallopliftparts.com/wp-content/uploads/2024/04/selcom-landing-door-right.jpg' },
-  { name: 'Fermator', slug: 'fermator', count: 31, image: 'https://www.gallopliftparts.com/wp-content/uploads/2024/04/door-controller-vf4.png' },
-  { name: 'Kone', slug: 'kone', count: 11, image: 'https://www.gallopliftparts.com/wp-content/uploads/2024/04/KM601370-1.webp' },
-  { name: 'Sword', slug: 'sword', count: 77, image: 'https://www.gallopliftparts.com/wp-content/uploads/2024/04/door-inverter-easy-con-1.webp' },
-  { name: 'Canny', slug: 'canny', count: 15, image: 'https://www.gallopliftparts.com/wp-content/uploads/2024/04/elevator-integrated-door-knife-xd-cs01-3.webp' },
-  { name: 'Mitsubishi', slug: 'mitsubishi', count: 162, image: 'https://www.gallopliftparts.com/wp-content/uploads/2024/11/ZR236-11-1.webp' },
-];
-
 
 
 export default function HomePage() {
-  // Fetch partners from database (server component)
+  // Fetch data from database (server component)
   const db = getDb();
   const partners = db.prepare(
     'SELECT * FROM partners WHERE is_active = 1 ORDER BY sort_order ASC'
   ).all() as { id: string; name: string; logo: string; website: string; sort_order: number }[];
+
+  const dbCategories = db.prepare(
+    `SELECT c.*, (SELECT COUNT(*) FROM products p WHERE p.category_id = c.id AND p.is_active = 1) as product_count
+     FROM categories c ORDER BY c.sort_order ASC`
+  ).all() as { id: string; name: string; slug: string; image: string; logo: string; sort_order: number; product_count: number }[];
+
+  // Fallback images for categories without custom images
+  const defaultImages: Record<string, string> = {
+    elevator: 'https://www.gallopliftparts.com/wp-content/uploads/2024/04/selcom-door.jpg',
+    escalator: 'https://www.gallopliftparts.com/wp-content/uploads/2024/05/escalator-step-7.png',
+    selcom: 'https://www.gallopliftparts.com/wp-content/uploads/2024/04/selcom-landing-door-right.jpg',
+    fermator: 'https://www.gallopliftparts.com/wp-content/uploads/2024/04/door-controller-vf4.png',
+    kone: 'https://www.gallopliftparts.com/wp-content/uploads/2024/04/KM601370-1.webp',
+    sword: 'https://www.gallopliftparts.com/wp-content/uploads/2024/04/door-inverter-easy-con-1.webp',
+    canny: 'https://www.gallopliftparts.com/wp-content/uploads/2024/04/elevator-integrated-door-knife-xd-cs01-3.webp',
+    mitsubishi: 'https://www.gallopliftparts.com/wp-content/uploads/2024/11/ZR236-11-1.webp',
+  };
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -135,7 +142,7 @@ export default function HomePage() {
       <section className="py-16 lg:py-20 bg-white">
         <div className="max-w-[1290px] mx-auto px-6">
           <div className="text-center mb-12">
-            <h2 className="text-[26px] font-medium text-[#222] uppercase tracking-wide">Why Choose Us</h2>
+            <h2 className="text-[32px] font-bold text-[#2B6CB0] uppercase tracking-wide">Why Choose Us</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-10">
             {features.map((feature) => (
@@ -146,7 +153,7 @@ export default function HomePage() {
                 <div className="mb-4">
                   {feature.icon}
                 </div>
-                <h3 className="text-[18px] font-medium text-[#222] mb-2">{feature.title}</h3>
+                <h3 className="text-[18px] font-semibold text-[#2B6CB0] mb-2">{feature.title}</h3>
                 <p className="text-[15px] text-[#555] leading-relaxed">{feature.description}</p>
               </div>
             ))}
@@ -158,45 +165,49 @@ export default function HomePage() {
       <section className="py-16 lg:py-20 bg-[#F7F7F7]">
         <div className="max-w-[1290px] mx-auto px-6">
           <div className="text-center mb-12">
-            <h2 className="text-[26px] font-medium text-[#222] uppercase tracking-wide">Product Categories</h2>
+            <h2 className="text-[32px] font-bold text-[#2B6CB0] uppercase tracking-wide">Product Categories</h2>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-5">
-            {categories.map((cat) => (
-              <Link
-                key={cat.slug}
-                href={`/products/${cat.slug}`}
-                className={`group overflow-hidden hover:shadow-lg transition-all relative ${
-                  cat.featured
-                    ? 'bg-gradient-to-br from-[#2B6CB0]/5 to-[#0891b2]/5 border-2 border-[#2B6CB0] ring-2 ring-[#2B6CB0]/20 shadow-md'
-                    : 'bg-white border border-[#e2e5e7]'
-                }`}
-              >
-                {cat.featured && (
-                  <div className="absolute top-2 right-2 z-10 bg-gradient-to-r from-[#2B6CB0] to-[#0891b2] text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shadow">
-                    Hot
+            {dbCategories.map((cat) => {
+              const isEscalator = cat.slug === 'escalator';
+              const catImage = cat.image || defaultImages[cat.slug] || '';
+              return (
+                <Link
+                  key={cat.id}
+                  href={`/products/${cat.slug}`}
+                  className={`group overflow-hidden hover:shadow-lg transition-all relative ${
+                    isEscalator
+                      ? 'bg-gradient-to-br from-[#2B6CB0]/5 to-[#0891b2]/5 border-2 border-[#2B6CB0] ring-2 ring-[#2B6CB0]/20 shadow-md'
+                      : 'bg-white border border-[#e2e5e7]'
+                  }`}
+                >
+                  {isEscalator && (
+                    <div className="absolute top-2 right-2 z-10 bg-gradient-to-r from-[#2B6CB0] to-[#0891b2] text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shadow">
+                      Hot
+                    </div>
+                  )}
+                  <div className="aspect-square bg-white relative overflow-hidden">
+                    <Image
+                      src={catImage}
+                      alt={cat.name}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      sizes="(max-width: 768px) 50vw, (max-width: 1024px) 25vw, 16vw"
+                    />
                   </div>
-                )}
-                <div className="aspect-square bg-white relative overflow-hidden">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={cat.image}
-                    alt={cat.name}
-                    className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300"
-                    loading="lazy"
-                  />
-                </div>
-                <div className={`p-3 text-center border-t ${
-                  cat.featured ? 'border-[#2B6CB0]/20 bg-gradient-to-r from-[#2B6CB0] to-[#0891b2]' : 'border-[#e2e5e7]'
-                }`}>
-                  <h3 className={`font-medium text-[16px] transition-colors ${
-                    cat.featured ? 'text-white font-semibold' : 'text-[#222] group-hover:text-[#046db1]'
-                  }`}>{cat.name}</h3>
-                  <p className={`text-[13px] mt-1 ${
-                    cat.featured ? 'text-white/80' : 'text-[#666]'
-                  }`}>{cat.count} products</p>
-                </div>
-              </Link>
-            ))}
+                  <div className={`p-3 text-center border-t ${
+                    isEscalator ? 'border-[#2B6CB0]/20 bg-gradient-to-r from-[#2B6CB0] to-[#0891b2]' : 'border-[#e2e5e7]'
+                  }`}>
+                    <h3 className={`font-medium text-[16px] transition-colors ${
+                      isEscalator ? 'text-white font-semibold' : 'text-[#222] group-hover:text-[#046db1]'
+                    }`}>{cat.name}</h3>
+                    <p className={`text-[13px] mt-1 ${
+                      isEscalator ? 'text-white/80' : 'text-[#666]'
+                    }`}>{cat.product_count} products</p>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -205,20 +216,20 @@ export default function HomePage() {
       <section className="py-16 lg:py-20 bg-white">
         <div className="max-w-[1290px] mx-auto px-6">
           <div className="text-center mb-12">
-            <h2 className="text-[26px] font-medium text-[#222] uppercase tracking-wide">Cooperation Partner</h2>
+            <h2 className="text-[32px] font-bold text-[#2B6CB0] uppercase tracking-wide">Cooperation Partner</h2>
           </div>
           <div className="grid grid-cols-4 md:grid-cols-5 gap-4">
             {partners.map((partner) => (
               <div
                 key={partner.id}
-                className="bg-white border border-[#e2e5e7] p-3 flex items-center justify-center aspect-[314/168]"
+                className="bg-white border border-[#e2e5e7] p-3 flex items-center justify-center aspect-[314/168] relative"
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
                   src={partner.logo}
                   alt={partner.name}
-                  className="max-w-full max-h-full object-contain"
-                  loading="lazy"
+                  fill
+                  className="object-contain"
+                  sizes="(max-width: 768px) 25vw, 20vw"
                 />
               </div>
             ))}

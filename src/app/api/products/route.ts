@@ -51,12 +51,19 @@ export async function GET(request: NextRequest) {
       `SELECT COUNT(*) as total FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE ${where}`
     ).get(...params) as { total: number };
 
+    // Sort
+    const sortParam = searchParams.get('sort') || 'default';
+    let orderClause = 'p.sort_order ASC, p.created_at DESC';
+    if (sortParam === 'hot') orderClause = 'p.is_featured DESC, p.sort_order ASC';
+    else if (sortParam === 'name') orderClause = 'p.name ASC';
+    else if (sortParam === 'newest') orderClause = 'p.created_at DESC';
+
     const products = db.prepare(
       `SELECT p.*, c.name as category_name, c.slug as category_slug 
        FROM products p 
        LEFT JOIN categories c ON p.category_id = c.id 
        WHERE ${where} 
-       ORDER BY p.sort_order ASC, p.created_at DESC 
+       ORDER BY ${orderClause} 
        LIMIT ? OFFSET ?`
     ).all(...params, limit, offset);
 

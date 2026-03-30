@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import { getDb, type Product } from '@/lib/db';
 import ProductCard from '@/components/ProductCard';
 
@@ -316,11 +317,13 @@ export default function EscalatorPage() {
             <div className="hidden lg:flex justify-center relative">
               <div className="relative w-[420px] h-[380px]">
                 <div className="absolute inset-0 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20" />
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
                   src="https://www.gallopliftparts.com/wp-content/uploads/2024/05/escalator-step-7.png"
                   alt="Escalator Step Parts"
-                  className="absolute inset-4 w-[calc(100%-32px)] h-[calc(100%-32px)] object-contain drop-shadow-2xl"
+                  fill
+                  className="object-contain drop-shadow-2xl"
+                  sizes="420px"
+                  priority
                 />
               </div>
               {/* Floating badge */}

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState, useEffect, useRef } from 'react';
 import { useCart } from './CartProvider';
 
@@ -103,11 +104,13 @@ export default function Header() {
           <div className={`flex justify-between items-center transition-all duration-300 ${scrolled ? 'h-[70px]' : 'h-[90px]'}`}>
             {/* Logo */}
             <Link href="/" className="flex items-center flex-shrink-0">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <Image
                 src="https://www.gallopliftparts.com/wp-content/uploads/2024/03/logo-text.png"
                 alt="Gallop Lift Parts"
-                className={`transition-all duration-300 ${scrolled ? 'h-[45px]' : 'h-[55px]'}`}
+                width={200}
+                height={55}
+                className={`transition-all duration-300 ${scrolled ? 'h-[45px] w-auto' : 'h-[55px] w-auto'}`}
+                priority
               />
             </Link>
 
@@ -142,10 +145,11 @@ export default function Header() {
                               className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors"
                             >
                               {cat.logo ? (
-                                /* eslint-disable-next-line @next/next/no-img-element */
-                                <img
+                                <Image
                                   src={cat.logo}
                                   alt={cat.name}
+                                  width={32}
+                                  height={24}
                                   className="w-8 h-6 object-contain flex-shrink-0"
                                 />
                               ) : (
@@ -233,8 +237,7 @@ export default function Header() {
                               onClick={() => setMobileMenuOpen(false)}
                             >
                               {cat.logo && (
-                                /* eslint-disable-next-line @next/next/no-img-element */
-                                <img src={cat.logo} alt={cat.name} className="w-7 h-5 object-contain" />
+                                <Image src={cat.logo} alt={cat.name} width={28} height={20} className="w-7 h-5 object-contain" />
                               )}
                               {cat.name}
                             </Link>

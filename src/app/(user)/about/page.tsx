@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export const metadata: Metadata = {
   title: 'About Us - Suzhou Gallop Technology Co., Ltd.',
@@ -55,34 +56,38 @@ export default function AboutPage() {
       <section className="py-12">
         <div className="max-w-[1290px] mx-auto px-6">
           <div className="bg-white border border-[#e2e5e7] p-8 lg:p-12">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
-              <div>
-                <h2 className="text-[26px] font-medium text-[#222] mb-4">Who We Are</h2>
-                <p className="text-[16px] text-[#555] leading-relaxed mb-4">
-                  Suzhou Gallop Technology Co., Ltd. is a professional &quot;One-Stop&quot; elevator and 
-                  escalator solution plan supplier based in Suzhou Industrial Park, China.
-                </p>
-                <p className="text-[16px] text-[#555] leading-relaxed mb-4">
-                  We are the supplier of mainstream elevator brands and the channel distributor for many 
-                  major foreign customers. Our company has grown to become a trusted name in the elevator 
-                  and escalator parts industry.
-                </p>
-                <p className="text-[16px] text-[#555] leading-relaxed">
-                  We specialize in providing high-quality replacement parts for all major elevator and
-                  escalator brands including Selcom, Fermator, Kone, Sword, Canny, Mitsubishi, and more.
-                  Our products are directly produced and shipped from our factory, ensuring the best
-                  quality at the most competitive prices.
-                </p>
-              </div>
-              <div>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img 
-                  src="https://www.gallopliftparts.com/wp-content/uploads/2024/03/gallop.webp" 
-                  alt="Gallop Technology Factory" 
-                  className="w-full"
-                />
-              </div>
-            </div>
+            <h2 className="text-[26px] font-medium text-[#222] mb-4">Who We Are</h2>
+            <p className="text-[16px] text-[#555] leading-relaxed mb-4">
+              Suzhou Gallop Technology Co., Ltd. is a professional &quot;One-Stop&quot; elevator and 
+              escalator solution plan supplier based in Suzhou Industrial Park, China.
+            </p>
+            <p className="text-[16px] text-[#555] leading-relaxed mb-4">
+              We are the supplier of mainstream elevator brands and the channel distributor for many 
+              major foreign customers. Our company has grown to become a trusted name in the elevator 
+              and escalator parts industry.
+            </p>
+            <p className="text-[16px] text-[#555] leading-relaxed">
+              We specialize in providing high-quality replacement parts for all major elevator and
+              escalator brands including Selcom, Fermator, Kone, Sword, Canny, Mitsubishi, and more.
+              Our products are directly produced and shipped from our factory, ensuring the best
+              quality at the most competitive prices.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Sales Network Map */}
+      <section className="py-12 bg-white">
+        <div className="max-w-[1290px] mx-auto px-6">
+          <h2 className="text-[26px] font-medium text-[#222] text-center mb-8 uppercase">Our Sales Network</h2>
+          <div className="overflow-hidden relative" style={{ aspectRatio: '16/9' }}>
+            <Image 
+              src="https://www.gallopliftparts.com/wp-content/uploads/2024/04/sales-network-map.webp" 
+              alt="Gallop Lift Parts Global Sales Network" 
+              fill
+              className="object-contain"
+              sizes="100vw"
+            />
           </div>
         </div>
       </section>
