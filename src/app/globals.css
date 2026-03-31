@@ -266,6 +266,36 @@ a {
   transform: scale(1.1);
 }
 
+/* Guide page styles */
+.guide-list {
+  list-style: disc;
+  margin: 8px 0 16px 20px;
+  font-size: 14px;
+  line-height: 1.8;
+  color: #555;
+}
+.guide-list li {
+  margin-bottom: 4px;
+}
+.guide-list-ordered {
+  list-style: decimal;
+  margin: 8px 0 16px 20px;
+  font-size: 14px;
+  line-height: 1.8;
+  color: #555;
+}
+.guide-list-ordered li {
+  margin-bottom: 4px;
+}
+.guide-subtitle {
+  font-size: 17px;
+  font-weight: 700;
+  color: #222;
+  margin: 20px 0 8px;
+  padding-left: 12px;
+  border-left: 3px solid #2B6CB0;
+}
+
 /* Check mark list on product page */
 .check-list li {
   display: flex;
