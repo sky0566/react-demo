@@ -186,7 +186,7 @@ export default function HomePage() {
                       Hot
                     </div>
                   )}
-                  <div className="aspect-square bg-white relative overflow-hidden">
+                  <div className="aspect-[4/3] bg-white relative overflow-hidden">
                     <Image
                       src={catImage}
                       alt={cat.name}

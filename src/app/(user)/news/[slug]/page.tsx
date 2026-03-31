@@ -78,9 +78,7 @@ export default async function NewsDetailPage({ params }: Props) {
         {/* Content */}
         {article.content ? (
           <div
-            className="prose prose-lg max-w-none text-[#333] leading-relaxed
-              prose-headings:text-[#222] prose-a:text-[#2B6CB0]
-              prose-img:rounded-lg prose-img:mx-auto"
+            className="wp-content"
             dangerouslySetInnerHTML={{ __html: article.content }}
           />
         ) : article.excerpt ? (

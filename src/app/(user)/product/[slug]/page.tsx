@@ -238,21 +238,6 @@ export default async function ProductPage({ params }: Props) {
           </div>
         )}
 
-        {/* Packing and Shipping section placeholder */}
-        <div className="mt-8 bg-white border border-[#e2e5e7] p-6">
-          <h2 className="text-[20px] font-bold text-[#222] mb-4">Packing and Shipping</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {['WORKSHOP', 'PACKING', 'LOADING', 'SHIPPING'].map((step) => (
-              <div key={step} className="text-center">
-                <div className="bg-[#f9f9f9] aspect-video flex items-center justify-center text-[#999] text-sm border border-[#e2e5e7]">
-                  <span>{step}</span>
-                </div>
-                <p className="mt-2 text-[14px] text-[#555] font-medium">{step}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
         {/* Quote Form */}
         <div className="mt-8 bg-white border border-[#e2e5e7] p-6">
           <h2 className="text-[20px] font-bold text-[#222] mb-4">Request a Quote</h2>

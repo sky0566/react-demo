@@ -82,7 +82,7 @@ export default function AboutPage() {
           <h2 className="text-[26px] font-medium text-[#222] text-center mb-8 uppercase">Our Sales Network</h2>
           <div className="overflow-hidden relative" style={{ aspectRatio: '16/9' }}>
             <Image 
-              src="https://www.gallopliftparts.com/wp-content/uploads/2024/04/sales-network-map.webp" 
+              src="https://www.gallopliftparts.com/wp-content/uploads/2024/04/sales-network-map.webp"
               alt="Gallop Lift Parts Global Sales Network" 
               fill
               className="object-contain"

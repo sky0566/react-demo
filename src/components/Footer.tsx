@@ -32,7 +32,7 @@ export default function Footer() {
                 alt="ISO Certifications" 
                 width={200}
                 height={60}
-                className="h-[45px] mt-4 w-auto"
+                className="h-[70px] mt-4 w-auto"
               />
             </div>
 

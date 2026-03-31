@@ -39,16 +39,10 @@ export default function ProductCard({ product }: ProductCardProps) {
             {product.name}
           </h3>
         </Link>
-        <div className="mt-3 flex gap-2">
-          <Link
-            href={`/product/${product.slug}`}
-            className="request-quote-btn flex-1 text-center py-2 text-[14px]"
-          >
-            Details
-          </Link>
+        <div className="mt-3">
           <AddToCartButton
             product={{ id: product.id, name: product.name, sku: product.sku, image: mainImage }}
-            className="py-2 px-3 text-[13px] font-medium rounded bg-[#2B6CB0] text-white hover:bg-[#225a9a]"
+            className="w-full py-2 px-3 text-[14px] font-medium bg-[#2B6CB0] text-white hover:bg-[#225a9a] text-center"
           />
         </div>
       </div>
