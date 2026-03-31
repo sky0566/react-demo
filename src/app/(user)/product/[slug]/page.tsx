@@ -50,7 +50,6 @@ export default async function ProductPage({ params }: Props) {
   if (!product) notFound();
 
   const images = parseJsonSafe<string[]>(product.images, []);
-  const specifications = parseJsonSafe<Record<string, string>>(product.specifications, {});
 
   // Related products
   const related = db.prepare(
@@ -170,23 +169,6 @@ export default async function ProductPage({ params }: Props) {
 
             {product.short_description && (
               <p className="mt-4 text-[#555] text-[16px] leading-relaxed">{product.short_description}</p>
-            )}
-
-            {/* Specifications Table */}
-            {Object.keys(specifications).length > 0 && (
-              <div className="mt-6">
-                <h2 className="text-[18px] font-bold text-[#222] mb-3">Specifications</h2>
-                <table className="w-full border-collapse border border-[#ddd] text-[14px]">
-                  <tbody>
-                    {Object.entries(specifications).map(([key, value], idx) => (
-                      <tr key={key} className={idx % 2 === 0 ? 'bg-[#f9f9f9]' : 'bg-white'}>
-                        <td className="border border-[#ddd] px-4 py-2 font-semibold text-[#333] w-[40%]">{key}</td>
-                        <td className="border border-[#ddd] px-4 py-2 text-[#555]">{value}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
             )}
 
             {/* Add to Quote / Request Quote button */}

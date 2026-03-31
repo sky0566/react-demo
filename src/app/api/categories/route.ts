@@ -27,8 +27,8 @@ export async function POST(request: NextRequest) {
     const slug = body.slug || slugify(body.name);
 
     db.prepare(
-      'INSERT INTO categories (id, name, slug, description, image, parent_id, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?)'
-    ).run(id, body.name, slug, body.description || '', body.image || '', body.parent_id || null, body.sort_order || 0);
+      'INSERT INTO categories (id, name, slug, description, image, parent_id, sort_order, logo) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+    ).run(id, body.name, slug, body.description || '', body.image || '', body.parent_id || null, body.sort_order || 0, body.logo || '');
 
     const category = db.prepare('SELECT * FROM categories WHERE id = ?').get(id);
     return NextResponse.json(category, { status: 201 });

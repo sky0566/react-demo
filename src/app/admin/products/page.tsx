@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
 
 interface Product {
@@ -33,6 +33,8 @@ export default function AdminProductsPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
+  const dragItemRef = useRef<number | null>(null);
+  const dragOverItemRef = useRef<number | null>(null);
 
   const fetchProducts = useCallback(async (page = 1) => {
     setLoading(true);
@@ -80,6 +82,27 @@ export default function AdminProductsPage() {
       body: JSON.stringify({ is_active: product.is_active ? 0 : 1 }),
     });
     fetchProducts(pagination.page);
+  };
+
+  const handleDragSort = async () => {
+    if (dragItemRef.current === null || dragOverItemRef.current === null) return;
+    if (dragItemRef.current === dragOverItemRef.current) return;
+
+    const reordered = [...products];
+    const [draggedItem] = reordered.splice(dragItemRef.current, 1);
+    reordered.splice(dragOverItemRef.current, 0, draggedItem);
+    setProducts(reordered);
+
+    dragItemRef.current = null;
+    dragOverItemRef.current = null;
+
+    // Save new order to server
+    const orders = reordered.map((p, idx) => ({ id: p.id, sort_order: idx }));
+    await fetch('/api/products/reorder', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orders }),
+    });
   };
 
   return (
@@ -160,6 +183,7 @@ export default function AdminProductsPage() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b">
               <tr>
+                <th className="w-8 px-2 py-3"></th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Product</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">SKU</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Category</th>
@@ -171,19 +195,32 @@ export default function AdminProductsPage() {
             <tbody className="divide-y">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-12 text-gray-500">Loading...</td>
+                  <td colSpan={7} className="text-center py-12 text-gray-500">Loading...</td>
                 </tr>
               ) : products.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-12 text-gray-500">
+                  <td colSpan={7} className="text-center py-12 text-gray-500">
                     No products found. Add your first product or use batch import.
                   </td>
                 </tr>
               ) : (
-                products.map((product) => {
+                products.map((product, index) => {
                   const images = (() => { try { return JSON.parse(product.images); } catch { return []; } })();
                   return (
-                    <tr key={product.id} className="hover:bg-gray-50">
+                    <tr
+                      key={product.id}
+                      className="hover:bg-gray-50 cursor-grab active:cursor-grabbing"
+                      draggable
+                      onDragStart={() => { dragItemRef.current = index; }}
+                      onDragEnter={() => { dragOverItemRef.current = index; }}
+                      onDragOver={(e) => e.preventDefault()}
+                      onDragEnd={handleDragSort}
+                    >
+                      <td className="px-2 py-3 text-gray-400">
+                        <svg className="w-4 h-4 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M7 2a2 2 0 10.001 4.001A2 2 0 007 2zm0 6a2 2 0 10.001 4.001A2 2 0 007 8zm0 6a2 2 0 10.001 4.001A2 2 0 007 14zm6-8a2 2 0 10-.001-4.001A2 2 0 0013 6zm0 2a2 2 0 10.001 4.001A2 2 0 0013 8zm0 6a2 2 0 10.001 4.001A2 2 0 0013 14z" />
+                        </svg>
+                      </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center space-x-3">
                           <div className="w-10 h-10 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">

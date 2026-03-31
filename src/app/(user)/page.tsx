@@ -142,7 +142,7 @@ export default function HomePage() {
       <section className="py-16 lg:py-20 bg-white">
         <div className="max-w-[1290px] mx-auto px-6">
           <div className="text-center mb-12">
-            <h2 className="text-[32px] font-bold text-[#2B6CB0] uppercase tracking-wide">Why Choose Us</h2>
+            <h2 className="text-[42px] font-[900] text-[#2B6CB0] uppercase tracking-wide">Why Choose Us</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-10">
             {features.map((feature) => (
@@ -165,7 +165,7 @@ export default function HomePage() {
       <section className="py-16 lg:py-20 bg-[#F7F7F7]">
         <div className="max-w-[1290px] mx-auto px-6">
           <div className="text-center mb-12">
-            <h2 className="text-[32px] font-bold text-[#2B6CB0] uppercase tracking-wide">Product Categories</h2>
+            <h2 className="text-[42px] font-[900] text-[#2B6CB0] uppercase tracking-wide">Product Categories</h2>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-5">
             {dbCategories.map((cat) => {
@@ -216,7 +216,7 @@ export default function HomePage() {
       <section className="py-16 lg:py-20 bg-white">
         <div className="max-w-[1290px] mx-auto px-6">
           <div className="text-center mb-12">
-            <h2 className="text-[32px] font-bold text-[#2B6CB0] uppercase tracking-wide">Cooperation Partner</h2>
+            <h2 className="text-[42px] font-[900] text-[#2B6CB0] uppercase tracking-wide">Cooperation Partner</h2>
           </div>
           <div className="grid grid-cols-4 md:grid-cols-5 gap-4">
             {partners.map((partner) => (

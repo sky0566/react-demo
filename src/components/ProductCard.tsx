@@ -23,7 +23,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   return (
     <article className="product-card flex flex-col">
       <Link href={`/product/${product.slug}`} className="block">
-        <div className="aspect-square bg-white relative overflow-hidden">
+        <div className="aspect-[4/3] bg-white relative overflow-hidden">
           <Image
             src={mainImage}
             alt={product.name}

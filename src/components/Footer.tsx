@@ -20,7 +20,7 @@ export default function Footer() {
                 alt="Gallop Lift Parts"
                 width={200}
                 height={55}
-                className="h-[55px] mb-5 w-auto"
+                className="h-[40px] mb-5 w-auto"
               />
               <p className="text-[#222] text-[15px] leading-relaxed mb-4">
                 Suzhou Gallop Technology Co., Ltd. is a professional &quot;One-Stop&quot; elevator and
@@ -32,12 +32,12 @@ export default function Footer() {
                 alt="ISO Certifications" 
                 width={200}
                 height={60}
-                className="h-[60px] mt-4 w-auto"
+                className="h-[45px] mt-4 w-auto"
               />
             </div>
 
             {/* Products */}
-            <div className="flex flex-col items-center md:items-start">
+            <div className="flex flex-col items-center">
               <h3 className="text-[#222] font-semibold text-[18px] mb-5">Products</h3>
               <ul className="space-y-2">
                 {categories.map((cat) => (

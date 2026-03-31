@@ -109,7 +109,7 @@ export default function CategoryProductList({ slug, categoryName }: { slug: stri
   return (
     <div className="flex gap-6">
       {/* Left Sidebar */}
-      <aside className="hidden lg:block w-[260px] flex-shrink-0">
+      <aside className="hidden lg:block w-[220px] flex-shrink-0">
         <div className="sticky top-[80px] space-y-4">
           {/* Search */}
           <div className="bg-white border border-[#e2e5e7] rounded-lg overflow-hidden">
@@ -132,9 +132,9 @@ export default function CategoryProductList({ slug, categoryName }: { slug: stri
           {/* Category List */}
           <div className="bg-white border border-[#e2e5e7] rounded-lg p-4">
             <h3 className="font-bold text-[16px] text-[#222] mb-3 uppercase">Product Categories</h3>
-            <ul className="space-y-1">
-              {categories.map((cat) => (
-                <li key={cat.id}>
+            <ul className="">
+              {categories.map((cat, index) => (
+                <li key={cat.id} className={index > 0 ? 'border-t border-[#e2e5e7]' : ''}>
                   <Link
                     href={`/products/${cat.slug}`}
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-[14px] transition-colors ${
