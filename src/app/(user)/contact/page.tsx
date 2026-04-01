@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import MapWrapper from '@/components/MapWrapper';
 import QuoteForm from '@/components/QuoteForm';
 
 export const metadata: Metadata = {
@@ -120,12 +121,23 @@ export default function ContactPage() {
             </a>
           </div>
 
-          {/* Quote Form */}
-          <div className="lg:col-span-2">
+          {/* Quote Form + Map */}
+          <div className="lg:col-span-2 space-y-6">
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 lg:p-8">
               <h2 className="text-[22px] font-bold text-[#222] mb-1">Send Us a Message</h2>
               <p className="text-[#888] text-[14px] mb-6">Fill out the form below and we&apos;ll get back to you within 24 hours.</p>
               <QuoteForm />
+            </div>
+
+            {/* Map */}
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+              <div className="p-6 pb-0">
+                <h2 className="text-[22px] font-bold text-[#222] mb-1">Our Location</h2>
+                <p className="text-[#888] text-[14px] mb-4">No.128 Jinji Lake Road, SIP, Suzhou, China</p>
+              </div>
+              <div className="h-[350px]">
+                <MapWrapper />
+              </div>
             </div>
           </div>
         </div>

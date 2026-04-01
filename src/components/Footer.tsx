@@ -30,9 +30,9 @@ export default function Footer() {
               <Image 
                 src="https://www.gallopliftparts.com/wp-content/uploads/2024/04/image-4.png" 
                 alt="ISO Certifications" 
-                width={200}
-                height={60}
-                className="h-[70px] mt-4 w-auto"
+                width={600}
+                height={180}
+                className="h-[210px] mt-4 w-auto"
               />
             </div>
 
