@@ -54,7 +54,7 @@ export default function AdminInquiriesPage() {
       ...(dateFrom ? { date_from: dateFrom } : {}),
       ...(dateTo ? { date_to: dateTo } : {}),
     });
-    const res = await fetch(`/api/inquiries?${params}`);
+    const res = await fetch(`/api/inquiries?${params}`, { headers });
     const data = await res.json();
     setInquiries(data.inquiries || []);
     setTotal(data.pagination?.total || 0);

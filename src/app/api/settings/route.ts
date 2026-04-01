@@ -2,8 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
 import { requireAdmin } from '@/lib/auth';
 
-// GET /api/settings
-export async function GET() {
+// GET /api/settings (admin only)
+export async function GET(request: NextRequest) {
+  const auth = requireAdmin(request);
+  if (auth instanceof NextResponse) return auth;
   try {
     const db = getDb();
     const rows = db.prepare('SELECT key, value FROM site_settings').all() as { key: string; value: string }[];

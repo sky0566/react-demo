@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { SingleImagePicker } from '@/components/ImagePicker';
+import RichEditor from '@/components/RichEditor';
 
 interface NewsItem {
   id: string;
@@ -24,6 +26,11 @@ export default function AdminNewsPage() {
     title: '', slug: '', content: '', excerpt: '', image: '', category: 'Shipping', is_active: 1, sort_order: 0
   });
 
+  const getAuthHeaders = () => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null;
+    return { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) };
+  };
+
   const fetchNews = async () => {
     setLoading(true);
     const res = await fetch('/api/news?active=0');
@@ -40,7 +47,7 @@ export default function AdminNewsPage() {
     const method = editing ? 'PUT' : 'POST';
     await fetch(url, {
       method,
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify(form),
     });
     setShowForm(false);
@@ -51,14 +58,14 @@ export default function AdminNewsPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this news article?')) return;
-    await fetch(`/api/news/${id}`, { method: 'DELETE' });
+    await fetch(`/api/news/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
     fetchNews();
   };
 
   const toggleActive = async (item: NewsItem) => {
     await fetch(`/api/news/${item.id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify({ is_active: item.is_active ? 0 : 1 }),
     });
     fetchNews();
@@ -125,12 +132,10 @@ export default function AdminNewsPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
-                <input
-                  type="text"
+                <SingleImagePicker
+                  label="Image URL"
                   value={form.image}
-                  onChange={(e) => setForm({ ...form, image: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  onChange={(url) => setForm({ ...form, image: url })}
                 />
               </div>
               <div>
@@ -143,12 +148,12 @@ export default function AdminNewsPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Content (HTML)</label>
-                <textarea
+                <RichEditor
+                  label="Content"
                   value={form.content}
-                  onChange={(e) => setForm({ ...form, content: e.target.value })}
-                  rows={8}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono"
+                  onChange={(v) => setForm({ ...form, content: v })}
+                  placeholder="Article content - supports Markdown"
+                  height={400}
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">

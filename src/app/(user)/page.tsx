@@ -90,14 +90,14 @@ export default function HomePage() {
 
   // Fallback images for categories without custom images
   const defaultImages: Record<string, string> = {
-    elevator: 'https://www.gallopliftparts.com/wp-content/uploads/2024/04/selcom-door.jpg',
-    escalator: 'https://www.gallopliftparts.com/wp-content/uploads/2024/05/escalator-step-7.png',
-    selcom: 'https://www.gallopliftparts.com/wp-content/uploads/2024/04/selcom-landing-door-right.jpg',
-    fermator: 'https://www.gallopliftparts.com/wp-content/uploads/2024/04/door-controller-vf4.png',
-    kone: 'https://www.gallopliftparts.com/wp-content/uploads/2024/04/KM601370-1.webp',
-    sword: 'https://www.gallopliftparts.com/wp-content/uploads/2024/04/door-inverter-easy-con-1.webp',
-    canny: 'https://www.gallopliftparts.com/wp-content/uploads/2024/04/elevator-integrated-door-knife-xd-cs01-3.webp',
-    mitsubishi: 'https://www.gallopliftparts.com/wp-content/uploads/2024/11/ZR236-11-1.webp',
+    elevator: '/images/wp/2024/04/selcom-door.jpg',
+    escalator: '/images/wp/2024/05/escalator-step-7.png',
+    selcom: '/images/wp/2024/04/selcom-landing-door-right.jpg',
+    fermator: '/images/wp/2024/04/door-controller-vf4.png',
+    kone: '/images/wp/2024/04/KM601370-1.webp',
+    sword: '/images/wp/2024/04/door-inverter-easy-con-1.webp',
+    canny: '/images/wp/2024/04/elevator-integrated-door-knife-xd-cs01-3.webp',
+    mitsubishi: '/images/wp/2024/11/ZR236-11-1.webp',
   };
 
   const jsonLd = {
@@ -105,7 +105,7 @@ export default function HomePage() {
     '@type': 'Organization',
     name: 'Suzhou Gallop Technology Co., Ltd.',
     url: 'https://www.gallopliftparts.com',
-    logo: 'https://www.gallopliftparts.com/wp-content/uploads/2024/03/logo-text.png',
+    logo: '/images/wp/2024/03/logo-text.png',
     description: 'Professional One-Stop elevator and escalator solution plan supplier.',
     address: {
       '@type': 'PostalAddress',
@@ -191,7 +191,7 @@ export default function HomePage() {
                       src={catImage}
                       alt={cat.name}
                       fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="object-cover"
                       sizes="(max-width: 768px) 50vw, (max-width: 1024px) 25vw, 16vw"
                     />
                   </div>
@@ -201,9 +201,6 @@ export default function HomePage() {
                     <h3 className={`font-medium text-[16px] transition-colors ${
                       isEscalator ? 'text-white font-semibold' : 'text-[#222] group-hover:text-[#046db1]'
                     }`}>{cat.name}</h3>
-                    <p className={`text-[13px] mt-1 ${
-                      isEscalator ? 'text-white/80' : 'text-[#666]'
-                    }`}>{cat.product_count} products</p>
                   </div>
                 </Link>
               );

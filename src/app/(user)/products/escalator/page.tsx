@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     url: 'https://www.gallopliftparts.com/products/escalator',
     images: [
       {
-        url: 'https://www.gallopliftparts.com/wp-content/uploads/2024/05/escalator-step-7.png',
+        url: '/images/wp/2024/05/escalator-step-7.png',
         width: 800,
         height: 600,
         alt: 'Escalator Parts',
@@ -318,7 +318,7 @@ export default function EscalatorPage() {
               <div className="relative w-[420px] h-[380px]">
                 <div className="absolute inset-0 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20" />
                 <Image
-                  src="https://www.gallopliftparts.com/wp-content/uploads/2024/05/escalator-step-7.png"
+                  src="/images/wp/2024/05/escalator-step-7.png"
                   alt="Escalator Step Parts"
                   fill
                   className="object-contain drop-shadow-2xl"

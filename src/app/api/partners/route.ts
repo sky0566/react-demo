@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
 import { v4 as uuidv4 } from 'uuid';
+import { requireAdmin } from '@/lib/auth';
 
 // GET /api/partners
 export async function GET() {
@@ -16,8 +17,10 @@ export async function GET() {
   }
 }
 
-// POST /api/partners
+// POST /api/partners (admin only)
 export async function POST(request: NextRequest) {
+  const auth = requireAdmin(request);
+  if (auth instanceof NextResponse) return auth;
   try {
     const db = getDb();
     const body = await request.json();

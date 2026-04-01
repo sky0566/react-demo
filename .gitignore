@@ -46,3 +46,13 @@ next-env.d.ts
 
 # dist
 /dist
+
+# temp files
+tmp_*.html
+
+# migration scripts (one-time use)
+scripts/migrate-wp-images.js
+scripts/count-wp-images.js
+
+# WP images (too large for git, host separately)
+/public/images/wp/

@@ -46,7 +46,7 @@ export default function AdminSettingsPage() {
   // Fetch blocked countries
   const fetchBlockedCountries = useCallback(async () => {
     try {
-      const res = await fetch('/api/settings');
+      const res = await fetch('/api/settings', { headers });
       if (res.ok) {
         const data = await res.json();
         if (data.blocked_countries) {

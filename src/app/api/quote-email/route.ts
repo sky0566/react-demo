@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
 import { randomUUID } from 'crypto';
+import { checkRateLimitGeneric, getClientIp } from '@/lib/auth';
 
 interface CartItem {
   id: string;
@@ -10,6 +11,12 @@ interface CartItem {
 }
 
 export async function POST(request: NextRequest) {
+  // Rate limit: 10 quote emails per hour per IP
+  const ip = getClientIp(request);
+  const rl = checkRateLimitGeneric('quote-email', ip, 10, 60 * 60 * 1000);
+  if (!rl.allowed) {
+    return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
+  }
   try {
     const { items, name, email, company, message } = (await request.json()) as {
       items: CartItem[];
@@ -54,11 +61,15 @@ export async function POST(request: NextRequest) {
           },
         });
 
+        // Sanitize header fields to prevent email header injection
+        const safeName = name.replace(/[\r\n]/g, '');
+        const safeCompany = company?.replace(/[\r\n]/g, '') || '';
+
         await transporter.sendMail({
           from: process.env.SMTP_FROM || 'noreply@gallopliftparts.com',
           to: 'info@gallopliftparts.com',
-          replyTo: email,
-          subject: `Quote Request from ${name}${company ? ` (${company})` : ''}`,
+          replyTo: email.replace(/[\r\n]/g, ''),
+          subject: `Quote Request from ${safeName}${safeCompany ? ` (${safeCompany})` : ''}`,
           text: `Name: ${name}\nEmail: ${email}\nCompany: ${company || 'N/A'}\n\n${fullMessage}`,
         });
       } catch (err) {

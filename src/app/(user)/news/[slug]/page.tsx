@@ -3,6 +3,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { getDb, type News } from '@/lib/db';
+import MarkdownContent from '@/components/MarkdownContent';
+import { sanitizeHtml } from '@/lib/sanitize';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -77,10 +79,7 @@ export default async function NewsDetailPage({ params }: Props) {
 
         {/* Content */}
         {article.content ? (
-          <div
-            className="wp-content"
-            dangerouslySetInnerHTML={{ __html: article.content }}
-          />
+          <MarkdownContent content={article.content} />
         ) : article.excerpt ? (
           <p className="text-[#555] text-[16px] leading-relaxed">{article.excerpt}</p>
         ) : null}

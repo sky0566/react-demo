@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { NextRequest, NextResponse } from 'next/server';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'gallop-lift-parts-secret-key-change-in-production';
+const JWT_SECRET = process.env.JWT_SECRET || 'gallop-lift-parts-jwt-secret-2024';
 
 export function signToken(payload: { id: string; username: string }): string {
   return jwt.sign(payload, JWT_SECRET, { expiresIn: '8h' });
@@ -22,33 +22,62 @@ export function getTokenFromHeader(authHeader: string | null): string | null {
 
 /** Verify admin auth from request. Returns user payload or a 401 NextResponse. */
 export function requireAdmin(request: NextRequest): { id: string; username: string } | NextResponse {
-  const token = getTokenFromHeader(request.headers.get('authorization'));
+  const token = getTokenFromHeader(request.headers.get('authorization'))
+    || request.cookies.get('admin_token')?.value
+    || null;
   if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const user = verifyToken(token);
   if (!user) return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
   return user;
 }
 
-/* ---------- Login Rate Limiter (in-memory) ---------- */
-const loginAttempts = new Map<string, { count: number; firstAttempt: number }>();
+/* ---------- Rate Limiter (in-memory, generic) ---------- */
+const rateLimitStores = new Map<string, Map<string, { count: number; firstAttempt: number }>>();
+
+function getRateLimitStore(name: string) {
+  if (!rateLimitStores.has(name)) {
+    rateLimitStores.set(name, new Map());
+  }
+  return rateLimitStores.get(name)!;
+}
+
+/* ---------- Login Rate Limiter ---------- */
 const MAX_ATTEMPTS = 5;
 const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
 
 export function checkRateLimit(ip: string): { allowed: boolean; retryAfterSec?: number } {
+  return checkRateLimitGeneric('login', ip, MAX_ATTEMPTS, WINDOW_MS);
+}
+
+export function resetRateLimit(ip: string) {
+  getRateLimitStore('login').delete(ip);
+}
+
+/** Generic rate limiter for any endpoint */
+export function checkRateLimitGeneric(
+  store: string,
+  key: string,
+  maxAttempts: number,
+  windowMs: number,
+): { allowed: boolean; retryAfterSec?: number } {
+  const attempts = getRateLimitStore(store);
   const now = Date.now();
-  const record = loginAttempts.get(ip);
-  if (!record || now - record.firstAttempt > WINDOW_MS) {
-    loginAttempts.set(ip, { count: 1, firstAttempt: now });
+  const record = attempts.get(key);
+  if (!record || now - record.firstAttempt > windowMs) {
+    attempts.set(key, { count: 1, firstAttempt: now });
     return { allowed: true };
   }
-  if (record.count >= MAX_ATTEMPTS) {
-    const retryAfter = Math.ceil((record.firstAttempt + WINDOW_MS - now) / 1000);
+  if (record.count >= maxAttempts) {
+    const retryAfter = Math.ceil((record.firstAttempt + windowMs - now) / 1000);
     return { allowed: false, retryAfterSec: retryAfter };
   }
   record.count++;
   return { allowed: true };
 }
 
-export function resetRateLimit(ip: string) {
-  loginAttempts.delete(ip);
+/** Helper: Get client IP from request */
+export function getClientIp(request: NextRequest): string {
+  return request.headers.get('x-forwarded-for')?.split(',')[0].trim()
+    || request.headers.get('x-real-ip')
+    || '0.0.0.0';
 }

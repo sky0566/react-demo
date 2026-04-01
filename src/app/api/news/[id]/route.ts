@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
+import { requireAdmin } from '@/lib/auth';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -21,8 +22,10 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
   }
 }
 
-// PUT /api/news/[id]
+// PUT /api/news/[id] (admin only)
 export async function PUT(request: NextRequest, { params }: RouteParams) {
+  const auth = requireAdmin(request);
+  if (auth instanceof NextResponse) return auth;
   try {
     const { id } = await params;
     const db = getDb();
@@ -57,8 +60,10 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   }
 }
 
-// DELETE /api/news/[id]
+// DELETE /api/news/[id] (admin only)
 export async function DELETE(_request: NextRequest, { params }: RouteParams) {
+  const auth = requireAdmin(_request);
+  if (auth instanceof NextResponse) return auth;
   try {
     const { id } = await params;
     const db = getDb();

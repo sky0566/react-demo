@@ -193,6 +193,15 @@ export default function AdminDashboard() {
   const [referrers, setReferrers] = useState<ReferrerItem[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const authFetch = useCallback(async (url: string) => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null;
+    const r = await fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+    if (r.status === 401) {
+      throw new Error('Unauthorized');
+    }
+    return r;
+  }, []);
+
   const [trafficRange, setTrafficRange] = useState('30');
   const [pagesRange, setPagesRange] = useState('30');
   const [browserRange, setBrowserRange] = useState('30');
@@ -209,48 +218,30 @@ export default function AdminDashboard() {
   const [vDevice, setVDevice] = useState('');
 
   const fetchOverview = useCallback(async () => {
-    const r = await fetch('/api/stats?type=overview');
-    setOverview(await r.json());
-  }, []);
+    try { const r = await authFetch('/api/stats?type=overview'); setOverview(await r.json()); } catch {}
+  }, [authFetch]);
   const fetchTraffic = useCallback(async () => {
-    const r = await fetch(`/api/stats?type=traffic&range=${trafficRange}`);
-    const d = await r.json();
-    setTrafficData(d.data || []);
-  }, [trafficRange]);
+    try { const r = await authFetch(`/api/stats?type=traffic&range=${trafficRange}`); const d = await r.json(); setTrafficData(d.data || []); } catch {}
+  }, [trafficRange, authFetch]);
   const fetchPages = useCallback(async () => {
-    const r = await fetch(`/api/stats?type=pages&range=${pagesRange}`);
-    const d = await r.json();
-    setPages(d.data || []);
-  }, [pagesRange]);
+    try { const r = await authFetch(`/api/stats?type=pages&range=${pagesRange}`); const d = await r.json(); setPages(d.data || []); } catch {}
+  }, [pagesRange, authFetch]);
   const fetchBrowsers = useCallback(async () => {
-    const r = await fetch(`/api/stats?type=browsers&range=${browserRange}`);
-    const d = await r.json();
-    setBrowserData(d.browsers || []);
-    setOsData(d.oses || []);
-    setDeviceData(d.devices || []);
-  }, [browserRange]);
+    try { const r = await authFetch(`/api/stats?type=browsers&range=${browserRange}`); const d = await r.json(); setBrowserData(d.browsers || []); setOsData(d.oses || []); setDeviceData(d.devices || []); } catch {}
+  }, [browserRange, authFetch]);
   const fetchCountries = useCallback(async () => {
-    const r = await fetch(`/api/stats?type=countries&range=${countryRange}`);
-    const d = await r.json();
-    setCountries(d.data || []);
-  }, [countryRange]);
+    try { const r = await authFetch(`/api/stats?type=countries&range=${countryRange}`); const d = await r.json(); setCountries(d.data || []); } catch {}
+  }, [countryRange, authFetch]);
   const fetchVisitors = useCallback(async () => {
-    const r = await fetch(`/api/stats?type=visitors&range=${visitorRange}`);
-    const d = await r.json();
-    setVisitors(d.data || []);
-  }, [visitorRange]);
+    try { const r = await authFetch(`/api/stats?type=visitors&range=${visitorRange}`); const d = await r.json(); setVisitors(d.data || []); } catch {}
+  }, [visitorRange, authFetch]);
   const fetchReferrers = useCallback(async () => {
-    const r = await fetch(`/api/stats?type=referrers&range=${referrerRange}`);
-    const d = await r.json();
-    setReferrers(d.data || []);
-  }, [referrerRange]);
+    try { const r = await authFetch(`/api/stats?type=referrers&range=${referrerRange}`); const d = await r.json(); setReferrers(d.data || []); } catch {}
+  }, [referrerRange, authFetch]);
 
   const fetchOnline = useCallback(async () => {
-    const r = await fetch('/api/stats?type=online');
-    const d = await r.json();
-    setOnlineCount(d.count || 0);
-    setOnlineVisitors(d.data || []);
-  }, []);
+    try { const r = await authFetch('/api/stats?type=online'); const d = await r.json(); setOnlineCount(d.count || 0); setOnlineVisitors(d.data || []); } catch {}
+  }, [authFetch]);
 
   const [refreshing, setRefreshing] = useState(false);
 

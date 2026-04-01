@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { SingleImagePicker } from '@/components/ImagePicker';
 
 interface Partner {
   id: string;
@@ -17,6 +18,11 @@ export default function AdminPartnersPage() {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Partner | null>(null);
   const [form, setForm] = useState({ name: '', logo: '', website: '', sort_order: 0, is_active: 1 });
+
+  const getAuthHeaders = () => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null;
+    return { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) };
+  };
 
   const fetchPartners = async () => {
     setLoading(true);
@@ -36,7 +42,7 @@ export default function AdminPartnersPage() {
     const method = editing ? 'PUT' : 'POST';
     await fetch(url, {
       method,
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify(form),
     });
     setShowForm(false);
@@ -47,14 +53,14 @@ export default function AdminPartnersPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this partner?')) return;
-    await fetch(`/api/partners/${id}`, { method: 'DELETE' });
+    await fetch(`/api/partners/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
     fetchPartners();
   };
 
   const toggleActive = async (partner: Partner) => {
     await fetch(`/api/partners/${partner.id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify({ is_active: partner.is_active ? 0 : 1 }),
     });
     fetchPartners();
@@ -92,11 +98,10 @@ export default function AdminPartnersPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Logo URL *</label>
-              <input
-                type="url" required value={form.logo}
-                onChange={(e) => setForm({ ...form, logo: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg text-sm"
+              <SingleImagePicker
+                label="Logo URL *"
+                value={form.logo}
+                onChange={(url) => setForm({ ...form, logo: url })}
                 placeholder="https://example.com/logo.png"
               />
             </div>
@@ -130,17 +135,6 @@ export default function AdminPartnersPage() {
                 </select>
               </div>
             </div>
-
-            {/* Logo preview */}
-            {form.logo && (
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Preview</label>
-                <div className="inline-flex border border-gray-200 rounded-lg p-3 bg-gray-50">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={form.logo} alt="Preview" className="h-16 object-contain" />
-                </div>
-              </div>
-            )}
 
             <div className="md:col-span-2 flex space-x-3">
               <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm">

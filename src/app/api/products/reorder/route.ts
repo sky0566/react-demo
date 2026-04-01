@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
+import { requireAdmin } from '@/lib/auth';
 
-// PUT /api/products/reorder
+// PUT /api/products/reorder (admin only)
 export async function PUT(request: NextRequest) {
+  const auth = requireAdmin(request);
+  if (auth instanceof NextResponse) return auth;
   try {
     const db = getDb();
     const body = await request.json();

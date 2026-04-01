@@ -212,7 +212,8 @@ function initializeDb(db: Database.Database) {
   const adminCount = db.prepare('SELECT COUNT(*) as c FROM admin_users').get() as { c: number };
   if (adminCount.c === 0) {
     const bcrypt = require('bcryptjs');
-    const hash = bcrypt.hashSync('admin123', 10);
+    const defaultPassword = process.env.ADMIN_DEFAULT_PASSWORD || 'admin123';
+    const hash = bcrypt.hashSync(defaultPassword, 10);
     db.prepare('INSERT INTO admin_users (id, username, password_hash) VALUES (?, ?, ?)').run(
       'admin-1',
       'admin',

@@ -16,30 +16,31 @@ export default function Footer() {
             {/* Company Info */}
             <div>
               <Image
-                src="https://www.gallopliftparts.com/wp-content/uploads/2024/03/logo-text.png"
+                src="/images/wp/2024/03/logo-text.png"
                 alt="Gallop Lift Parts"
-                width={200}
-                height={55}
-                className="h-[40px] mb-5 w-auto"
+                width={160}
+                height={40}
+                className="h-[32px] mb-5 w-auto"
               />
               <p className="text-[#222] text-[15px] leading-relaxed mb-4">
                 Suzhou Gallop Technology Co., Ltd. is a professional &quot;One-Stop&quot; elevator and
                 escalator solution plan supplier.
               </p>
-              {/* Certification image */}
+              {/* QR Codes */}
               <Image 
-                src="https://www.gallopliftparts.com/wp-content/uploads/2024/04/image-4.png" 
-                alt="ISO Certifications" 
-                width={600}
-                height={180}
-                className="h-[210px] mt-4 w-auto"
+                src="/images/wp/2024/04/image-4.png" 
+                alt="WhatsApp & WeChat QR Codes" 
+                width={233}
+                height={157}
+                className="mt-4 w-auto"
+                style={{ height: 'auto', maxWidth: '233px' }}
               />
             </div>
 
             {/* Products */}
-            <div className="flex flex-col items-center">
+            <div className="flex flex-col items-center md:items-center">
               <h3 className="text-[#222] font-semibold text-[18px] mb-5">Products</h3>
-              <ul className="space-y-2">
+              <ul className="space-y-2 text-center">
                 {categories.map((cat) => (
                   <li key={cat}>
                     <Link

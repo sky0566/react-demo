@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import { checkRateLimitGeneric, getClientIp } from '@/lib/auth';
 
 interface CartItem {
   id: string;
@@ -9,6 +10,12 @@ interface CartItem {
 }
 
 export async function POST(request: NextRequest) {
+  // Rate limit: 30 PDF generations per hour per IP
+  const ip = getClientIp(request);
+  const rl = checkRateLimitGeneric('quote-doc', ip, 30, 60 * 60 * 1000);
+  if (!rl.allowed) {
+    return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
+  }
   try {
     const { items } = (await request.json()) as { items: CartItem[] };
 

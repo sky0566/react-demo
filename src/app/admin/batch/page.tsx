@@ -19,6 +19,8 @@ export default function AdminBatchPage() {
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<{ id: string; name: string; slug: string }[]>([]);
 
+  const getToken = () => typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null;
+
   useEffect(() => {
     fetch('/api/categories').then(r => r.json()).then(setCategories);
   }, []);
@@ -30,7 +32,7 @@ export default function AdminBatchPage() {
     try {
       const res = await fetch('/api/products/batch', {
         method: 'POST',
-        headers: { 'Content-Type': 'text/csv' },
+        headers: { 'Content-Type': 'text/csv', ...(getToken() ? { Authorization: `Bearer ${getToken()}` } : {}) },
         body: csvText,
       });
       const data = await res.json();
@@ -50,7 +52,7 @@ export default function AdminBatchPage() {
       const parsed = JSON.parse(jsonText);
       const res = await fetch('/api/products/batch', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(getToken() ? { Authorization: `Bearer ${getToken()}` } : {}) },
         body: JSON.stringify(parsed),
       });
       const data = await res.json();
@@ -76,7 +78,7 @@ export default function AdminBatchPage() {
       }));
       const res = await fetch('/api/products/batch', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(getToken() ? { Authorization: `Bearer ${getToken()}` } : {}) },
         body: JSON.stringify(items),
       });
       const data = await res.json();

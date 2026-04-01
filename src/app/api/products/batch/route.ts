@@ -3,9 +3,12 @@ import { getDb } from '@/lib/db';
 import Papa from 'papaparse';
 import { v4 as uuidv4 } from 'uuid';
 import { slugify } from '@/lib/utils';
+import { requireAdmin } from '@/lib/auth';
 
-// POST /api/products/batch - Batch import products from CSV
+// POST /api/products/batch - Batch import products from CSV (admin only)
 export async function POST(request: NextRequest) {
+  const auth = requireAdmin(request);
+  if (auth instanceof NextResponse) return auth;
   try {
     const db = getDb();
     const contentType = request.headers.get('content-type') || '';

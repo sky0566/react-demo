@@ -3,6 +3,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { getDb, type Product } from '@/lib/db';
+import { sanitizeHtml } from '@/lib/sanitize';
+import MarkdownContent from '@/components/MarkdownContent';
 import { parseJsonSafe } from '@/lib/utils';
 import ProductCard from '@/components/ProductCard';
 import QuoteForm from '@/components/QuoteForm';
@@ -134,7 +136,7 @@ export default async function ProductPage({ params }: Props) {
           <div>
             <div className="overflow-hidden">
               {images.length > 0 ? (
-                <div className="relative w-full" style={{ height: '350px' }}>
+                <div className="relative w-full" style={{ height: '280px' }}>
                   <Image
                     src={images[0]}
                     alt={product.name}
@@ -233,7 +235,7 @@ export default async function ProductPage({ params }: Props) {
               <h2 className="inline-block bg-white border border-[#e2e5e7] border-b-white px-5 py-3 text-[15px] font-bold text-[#222] -mb-px">Description</h2>
             </div>
             <div className="border border-[#e2e5e7] border-t-0 p-6">
-              <div className="wp-content" dangerouslySetInnerHTML={{ __html: product.description }} />
+              <MarkdownContent content={product.description} />
             </div>
           </div>
         )}

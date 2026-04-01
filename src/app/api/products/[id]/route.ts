@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
+import { requireAdmin } from '@/lib/auth';
 
 // GET /api/products/[id]
 export async function GET(
@@ -43,11 +44,13 @@ export async function GET(
   }
 }
 
-// PUT /api/products/[id]
+// PUT /api/products/[id] (admin only)
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = requireAdmin(request);
+  if (auth instanceof NextResponse) return auth;
   try {
     const db = getDb();
     const { id } = await params;
@@ -106,11 +109,13 @@ export async function PUT(
   }
 }
 
-// DELETE /api/products/[id]
+// DELETE /api/products/[id] (admin only)
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = requireAdmin(request);
+  if (auth instanceof NextResponse) return auth;
   try {
     const db = getDb();
     const { id } = await params;

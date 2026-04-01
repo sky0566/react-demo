@@ -15,6 +15,7 @@ const sections = [
   { id: 'inquiries', label: 'Inquiries' },
   { id: 'partners', label: 'Partners' },
   { id: 'settings', label: 'Settings' },
+  { id: 'security', label: 'Security (安全)' },
 ];
 
 export default function GuidePage() {
@@ -101,10 +102,17 @@ export default function GuidePage() {
 
             <h4 className="guide-subtitle">编辑产品</h4>
             <p>点击产品行右侧的 <code>Edit</code> 按钮，修改后点击 <code>Update</code> 保存。</p>
+            <p className="mt-2">编辑弹窗右上角有 <code>Preview</code> 按钮，点击可实时预览：</p>
+            <ul className="guide-list">
+              <li><strong>图片预览</strong> — 查看所有图片 URL 是否正确加载</li>
+              <li><strong>Description 渲染</strong> — 查看 HTML 描述的实际排版效果</li>
+              <li><strong>SEO 预览</strong> — 模拟 Google 搜索结果展示标题和描述</li>
+            </ul>
+            <Tip>每次修改 Description 或 SEO 字段后，建议点 Preview 确认效果再保存。</Tip>
 
             <h4 className="guide-subtitle">拖动排序</h4>
             <p>产品列表左侧有拖拽手柄（六个点图标），按住拖动可以调整产品的显示顺序。松手后自动保存到服务器。</p>
-            <Tip>排序会影响前台产品列表页的默认显示顺序。热门产品建议拖到最前面。</Tip>
+            <Tip>排序会立即同步到前台产品列表（Hot Selling 排序）。前台默认按 Hot Selling 排序，只有两种排序：Hot Selling 和 Name。热门产品建议拖到最前面。</Tip>
 
             <h4 className="guide-subtitle">批量导入</h4>
             <p>点击 <code>Batch Import</code> 可以通过 JSON 格式批量导入产品数据。</p>
@@ -137,7 +145,7 @@ export default function GuidePage() {
               <li><strong>Category Image (Homepage)</strong> — 分类大图，显示在首页的 Product Categories 卡片中</li>
             </ul>
             <p>点击 <code>Edit Logo</code> 或 <code>Edit Image</code> 按钮，粘贴图片 URL 后点击 Save 即可。</p>
-            <Tip>建议 Logo 图标使用透明背景的 PNG 格式，尺寸约 100×40px。分类大图建议使用正方形比例的产品图。</Tip>
+            <Tip>建议 Logo 图标使用透明背景的 PNG 格式，尺寸约 100×40px。分类大图建议使用 4:3 长方形比例的产品图。</Tip>
           </section>
 
           {/* Section: News */}
@@ -369,9 +377,137 @@ export default function GuidePage() {
             <Tip>建议定期更换密码，使用强密码（8位以上，包含字母数字特殊字符）。</Tip>
           </section>
 
+          {/* Section: Security */}
+          <section id="security" className="mb-12">
+            <SectionTitle>
+              <span className="inline-flex items-center gap-2">
+                10. Security 安全策略
+                <span className="bg-red-500 text-white text-[12px] px-2 py-0.5 rounded-full font-normal">重要</span>
+              </span>
+            </SectionTitle>
+            
+            <div className="bg-[#fef2f2] border border-red-200 rounded-lg p-5 mb-6 text-[14px]">
+              <strong className="text-red-800">网站已内置多层安全防护</strong>
+              <p className="text-red-800 mt-1">
+                以下安全机制已自动生效，无需手动配置。了解这些机制有助于正确使用后台和排查问题。
+              </p>
+            </div>
+
+            <h4 className="guide-subtitle">10.1 API 鉴权保护</h4>
+            <p>所有后台管理操作（增删改）的 API 都需要登录后的 Token 才能访问：</p>
+            <ul className="guide-list">
+              <li><strong>产品、分类、新闻、合作伙伴</strong> — 创建、修改、删除全部需要管理员身份验证</li>
+              <li><strong>询盘数据</strong> — 查看、修改、删除需要管理员登录（客户提交询盘不需要登录）</li>
+              <li><strong>统计数据、系统设置</strong> — 仅管理员可查看和修改</li>
+              <li><strong>公开接口不受影响</strong> — 产品列表、新闻列表等前台展示接口正常公开</li>
+            </ul>
+            <Tip>如果在后台操作时遇到 &quot;Unauthorized&quot; 错误，说明登录已过期（8小时），请重新登录。</Tip>
+
+            <h4 className="guide-subtitle">10.2 XSS 防护（跨站脚本攻击）</h4>
+            <p>所有用户输入的 HTML 内容（产品描述、新闻正文）在页面显示前会自动消毒处理：</p>
+            <ul className="guide-list">
+              <li>自动过滤 <code>&lt;script&gt;</code>、<code>&lt;iframe&gt;</code>、<code>onclick</code> 等危险标签和属性</li>
+              <li>保留安全的 HTML 标签（标题、列表、表格、图片、链接等）</li>
+              <li>后台编辑预览同样受到保护</li>
+            </ul>
+            <Tip>正常使用 HTML 编写产品描述和新闻内容不受影响，只有恶意代码会被过滤。</Tip>
+
+            <h4 className="guide-subtitle">10.3 访问频率限制</h4>
+            <p>为防止恶意攻击和垃圾信息，以下操作有频率限制：</p>
+            <div className="bg-gray-50 border rounded-lg p-5 my-4">
+              <table className="w-full text-[14px]">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left py-2 font-bold">操作</th>
+                    <th className="text-left py-2 font-bold">限制</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b">
+                    <td className="py-2">管理员登录</td>
+                    <td className="py-2">5 次 / 15 分钟（每 IP）</td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="py-2">客户提交询盘</td>
+                    <td className="py-2">20 次 / 小时（每 IP）</td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="py-2">发送报价邮件</td>
+                    <td className="py-2">10 次 / 小时（每 IP）</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2">下载报价 PDF</td>
+                    <td className="py-2">30 次 / 小时（每 IP）</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <Tip>正常客户操作不会触发限制。如果客户反馈无法提交询盘，可能是同一网络（如公司）的多人同时操作，过一小时后自动恢复。</Tip>
+
+            <h4 className="guide-subtitle">10.4 HTTP 安全头</h4>
+            <p>网站自动添加了以下 HTTP 安全响应头：</p>
+            <ul className="guide-list">
+              <li><strong>X-Frame-Options: SAMEORIGIN</strong> — 防止网站被嵌入到其他站点的 iframe 中（防点击劫持）</li>
+              <li><strong>X-Content-Type-Options: nosniff</strong> — 防止浏览器 MIME 类型嗅探</li>
+              <li><strong>Strict-Transport-Security</strong> — 强制 HTTPS 访问</li>
+              <li><strong>Referrer-Policy</strong> — 控制来源信息的发送策略</li>
+              <li><strong>Permissions-Policy</strong> — 禁用不需要的浏览器 API（摄像头、麦克风、定位）</li>
+            </ul>
+
+            <h4 className="guide-subtitle">10.5 Middleware 路由保护</h4>
+            <p>所有 <code>/admin</code> 页面在服务器端受 middleware 保护：</p>
+            <ul className="guide-list">
+              <li>未登录访问 <code>/admin</code> 会自动跳转到登录页</li>
+              <li>登录 Token 有效期 8 小时，过期后需重新登录</li>
+            </ul>
+
+            <h4 className="guide-subtitle">10.6 输入验证</h4>
+            <p>客户提交的表单数据会进行验证：</p>
+            <ul className="guide-list">
+              <li>必填字段检查（姓名、邮箱）</li>
+              <li>邮箱格式验证</li>
+              <li>字段长度限制（姓名 200 字符、留言 5000 字符等）</li>
+              <li>邮件头注入防护（过滤换行符等控制字符）</li>
+            </ul>
+
+            <h4 className="guide-subtitle">10.7 图片安全</h4>
+            <p>所有产品图片已迁移到本地服务器，不再依赖外部 WordPress 服务器。</p>
+            <ul className="guide-list">
+              <li>图片存储在 <code>/images/wp/</code> 目录下，由 Next.js 直接提供服务</li>
+              <li>图片加载限制为指定域名，防止恶意外链</li>
+            </ul>
+
+            <h4 className="guide-subtitle">10.8 上线前安全检查清单</h4>
+            <div className="bg-[#fef2f2] border border-red-200 rounded-lg p-5 my-4">
+              <ul className="space-y-2 text-[14px]">
+                <li className="flex items-start gap-2">
+                  <span className="text-red-600 mt-0.5">☐</span>
+                  <span>修改默认管理员密码（默认 <code>admin</code> / <code>admin123</code>）</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-600 mt-0.5">☐</span>
+                  <span>设置环境变量 <code>JWT_SECRET</code>（用于加密登录令牌，建议 32 位以上随机字符串）</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-600 mt-0.5">☐</span>
+                  <span>确认 SMTP 邮件配置正确（如已配置）</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-600 mt-0.5">☐</span>
+                  <span>域名已启用 HTTPS</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-600 mt-0.5">☐</span>
+                  <span>Vercel 环境变量中设置了 <code>JWT_SECRET</code></span>
+                </li>
+              </ul>
+            </div>
+            <Tip>上线前务必完成以上检查清单，特别是修改默认密码和设置 JWT_SECRET！</Tip>
+          </section>
+
           {/* Footer */}
           <div className="mt-16 pt-8 border-t border-[#e2e5e7] text-center text-[14px] text-[#999]">
-            <p>Gallop Lift Parts Admin Guide · Last updated: March 2026</p>
+            <p>Gallop Lift Parts Admin Guide · Last updated: April 2026</p>
           </div>
         </main>
       </div>

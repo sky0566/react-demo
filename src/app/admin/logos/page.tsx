@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { SingleImagePicker } from '@/components/ImagePicker';
 
 interface Category {
   id: string;
@@ -14,6 +15,11 @@ export default function AdminLogosPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
+
+  const getAuthHeaders = () => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null;
+    return { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) };
+  };
 
   const fetchCategories = async () => {
     setLoading(true);
@@ -31,7 +37,7 @@ export default function AdminLogosPage() {
     setSaving(id);
     await fetch(`/api/categories/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify({ logo }),
     });
     setCategories(prev => prev.map(c => c.id === id ? { ...c, logo } : c));
@@ -42,7 +48,7 @@ export default function AdminLogosPage() {
     setSaving(id);
     await fetch(`/api/categories/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify({ image }),
     });
     setCategories(prev => prev.map(c => c.id === id ? { ...c, image } : c));
@@ -121,11 +127,10 @@ function LogoRow({
       <td className="px-4 py-3">
         {editingLogo ? (
           <div className="flex items-center gap-2">
-            <input
-              type="text"
+            <SingleImagePicker
+              label=""
               value={logoUrl}
-              onChange={(e) => setLogoUrl(e.target.value)}
-              className="px-2 py-1 border rounded text-xs w-48"
+              onChange={(url) => setLogoUrl(url)}
               placeholder="Logo URL"
             />
             <button
@@ -159,11 +164,10 @@ function LogoRow({
       <td className="px-4 py-3">
         {editingImage ? (
           <div className="flex items-center gap-2">
-            <input
-              type="text"
+            <SingleImagePicker
+              label=""
               value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              className="px-2 py-1 border rounded text-xs w-48"
+              onChange={(url) => setImageUrl(url)}
               placeholder="Image URL"
             />
             <button

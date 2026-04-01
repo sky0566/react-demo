@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
 import { v4 as uuidv4 } from 'uuid';
+import { requireAdmin } from '@/lib/auth';
 
-// GET /api/inquiries
+// GET /api/inquiries (admin only)
 export async function GET(request: NextRequest) {
+  const auth = requireAdmin(request);
+  if (auth instanceof NextResponse) return auth;
   try {
     const db = getDb();
     const { searchParams } = new URL(request.url);
@@ -66,16 +69,40 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/inquiries
+// POST /api/inquiries (public - customer submissions)
 export async function POST(request: NextRequest) {
+  // Rate limit: 20 inquiries per hour per IP
+  const { checkRateLimitGeneric, getClientIp } = await import('@/lib/auth');
+  const ip = getClientIp(request);
+  const rl = checkRateLimitGeneric('inquiries', ip, 20, 60 * 60 * 1000);
+  if (!rl.allowed) {
+    return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
+  }
   try {
     const db = getDb();
     const body = await request.json();
+
+    // Input validation
+    const name = typeof body.name === 'string' ? body.name.trim().slice(0, 200) : '';
+    const email = typeof body.email === 'string' ? body.email.trim().slice(0, 200) : '';
+    const phone = typeof body.phone === 'string' ? body.phone.trim().slice(0, 50) : '';
+    const company = typeof body.company === 'string' ? body.company.trim().slice(0, 200) : '';
+    const message = typeof body.message === 'string' ? body.message.trim().slice(0, 5000) : '';
+
+    if (!name || !email) {
+      return NextResponse.json({ error: 'Name and email are required' }, { status: 400 });
+    }
+
+    // Basic email format validation
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return NextResponse.json({ error: 'Invalid email format' }, { status: 400 });
+    }
+
     const id = uuidv4();
 
     db.prepare(
       'INSERT INTO inquiries (id, product_id, name, email, phone, company, message) VALUES (?, ?, ?, ?, ?, ?, ?)'
-    ).run(id, body.product_id || null, body.name, body.email, body.phone || '', body.company || '', body.message || '');
+    ).run(id, body.product_id || null, name, email, phone, company, message);
 
     return NextResponse.json({ success: true, id }, { status: 201 });
   } catch (error) {

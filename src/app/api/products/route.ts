@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
 import { v4 as uuidv4 } from 'uuid';
 import { slugify } from '@/lib/utils';
+import { requireAdmin } from '@/lib/auth';
 
 // GET /api/products?category=slug&page=1&limit=15&search=keyword
 export async function GET(request: NextRequest) {
@@ -54,7 +55,7 @@ export async function GET(request: NextRequest) {
     // Sort
     const sortParam = searchParams.get('sort') || 'default';
     let orderClause = 'p.sort_order ASC, p.created_at DESC';
-    if (sortParam === 'hot') orderClause = 'p.is_featured DESC, p.sort_order ASC';
+    if (sortParam === 'hot') orderClause = 'p.sort_order ASC, p.created_at DESC';
     else if (sortParam === 'name') orderClause = 'p.name ASC';
     else if (sortParam === 'newest') orderClause = 'p.created_at DESC';
 
@@ -82,8 +83,10 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/products
+// POST /api/products (admin only)
 export async function POST(request: NextRequest) {
+  const auth = requireAdmin(request);
+  if (auth instanceof NextResponse) return auth;
   try {
     const db = getDb();
     const body = await request.json();

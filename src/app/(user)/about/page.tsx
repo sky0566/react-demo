@@ -52,7 +52,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Company Overview */}
+      {/* Company Overview - full width text, sales network below */}
       <section className="py-12">
         <div className="max-w-[1290px] mx-auto px-6">
           <div className="bg-white border border-[#e2e5e7] p-8 lg:p-12">
@@ -66,28 +66,24 @@ export default function AboutPage() {
               major foreign customers. Our company has grown to become a trusted name in the elevator 
               and escalator parts industry.
             </p>
-            <p className="text-[16px] text-[#555] leading-relaxed">
+            <p className="text-[16px] text-[#555] leading-relaxed mb-8">
               We specialize in providing high-quality replacement parts for all major elevator and
               escalator brands including Selcom, Fermator, Kone, Sword, Canny, Mitsubishi, and more.
               Our products are directly produced and shipped from our factory, ensuring the best
               quality at the most competitive prices.
             </p>
-          </div>
-        </div>
-      </section>
 
-      {/* Sales Network Map */}
-      <section className="py-12 bg-white">
-        <div className="max-w-[1290px] mx-auto px-6">
-          <h2 className="text-[26px] font-medium text-[#222] text-center mb-8 uppercase">Our Sales Network</h2>
-          <div className="overflow-hidden relative" style={{ aspectRatio: '16/9' }}>
-            <Image
-              src="/images/earth.webp"
-              alt="Gallop Lift Parts Global Sales Network"
-              fill
-              className="object-contain"
-              sizes="100vw"
-            />
+            {/* Sales Network Map - below text */}
+            <h3 className="text-[20px] font-medium text-[#222] mb-4 uppercase">Our Sales Network</h3>
+            <div className="overflow-hidden relative" style={{ aspectRatio: '16/9' }}>
+              <Image
+                src="/images/earth.webp"
+                alt="Gallop Lift Parts Global Sales Network"
+                fill
+                className="object-contain"
+                sizes="100vw"
+              />
+            </div>
           </div>
         </div>
       </section>

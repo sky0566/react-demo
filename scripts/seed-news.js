@@ -98,7 +98,7 @@ const articles = [
 <p>For products like controllers, traction machines, cabins, guide rails or elevator doors etc. that come out a heavy weight more than 200kg or so, international sea shipping will be a first choice for its cost efficiency and safety. Delivery time vary from 7-30 days depending on the distance of the destination port.</p>
 <p>For small order weighing around 100kg or under, we offer excellent international express shipping service such as DHL, FEDEX, UPS, ARAMAX, etc. To ensure you receive products in a prompt time normally in 3-7 days.</p>`,
     excerpt: 'Learn how we ship elevator and escalator parts worldwide - sea shipping for heavy orders (200kg+) and express shipping (DHL, FedEx, UPS) for smaller orders.',
-    image: 'https://www.gallopliftparts.com/wp-content/uploads/2024/04/packing-1.jpg',
+    image: 'https://www.gallopliftparts.com/wp-content/uploads/2024/04/sea-ship-vehicle-cargo-ship-ferry-cargo-917877-pxhere.com_.jpg',
     category: 'Shipping',
     created_at: '2021-09-05 00:00:00',
     sort_order: 3,

@@ -5,15 +5,15 @@ import Image from 'next/image';
 
 const slides = [
   {
-    src: 'https://www.gallopliftparts.com/wp-content/uploads/2024/03/gallop.webp',
+    src: '/images/wp/2024/03/gallop.webp',
     alt: 'Gallop Lift Parts - Professional Elevator & Escalator Parts Supplier',
   },
   {
-    src: 'https://www.gallopliftparts.com/wp-content/uploads/2024/03/one.webp',
+    src: '/images/wp/2024/03/one.webp',
     alt: 'One-Stop Elevator Solution',
   },
   {
-    src: 'https://www.gallopliftparts.com/wp-content/uploads/2024/03/three.webp',
+    src: '/images/wp/2024/03/three.webp',
     alt: 'Quality Elevator Parts',
   },
 ];
@@ -31,12 +31,12 @@ export default function HeroSlider() {
   }, [next]);
 
   return (
-    <section className="hero-slider w-full" style={{ aspectRatio: '2500 / 900' }}>
+    <section className="hero-slider w-full" style={{ height: 'clamp(280px, 36vw, 700px)' }}>
       {slides.map((slide, idx) => (
         <div
           key={idx}
           className={`hero-slide ${idx === current ? 'active' : ''}`}
-          style={{ position: idx === 0 ? 'relative' : 'absolute' }}
+          style={{ height: '100%' }}
         >
           <Image
             src={slide.src}

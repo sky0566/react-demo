@@ -1,7 +1,11 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef } from 'react';
+import DOMPurify from 'isomorphic-dompurify';
 import Link from 'next/link';
+import ImagePicker from '@/components/ImagePicker';
+import RichEditor from '@/components/RichEditor';
+import MarkdownContent from '@/components/MarkdownContent';
 
 interface Product {
   id: string;
@@ -35,6 +39,11 @@ export default function AdminProductsPage() {
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   const dragItemRef = useRef<number | null>(null);
   const dragOverItemRef = useRef<number | null>(null);
+
+  const getAuthHeaders = () => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null;
+    return { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) };
+  };
 
   const fetchProducts = useCallback(async (page = 1) => {
     setLoading(true);
@@ -71,14 +80,14 @@ export default function AdminProductsPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this product?')) return;
-    await fetch(`/api/products/${id}`, { method: 'DELETE' });
+    await fetch(`/api/products/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
     fetchProducts(pagination.page);
   };
 
   const handleToggleActive = async (product: Product) => {
     await fetch(`/api/products/${product.id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify({ is_active: product.is_active ? 0 : 1 }),
     });
     fetchProducts(pagination.page);
@@ -100,7 +109,7 @@ export default function AdminProductsPage() {
     const orders = reordered.map((p, idx) => ({ id: p.id, sort_order: idx }));
     await fetch('/api/products/reorder', {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify({ orders }),
     });
   };
@@ -321,7 +330,7 @@ function ProductFormModal({
     category_id: '',
     price: product?.price || 0,
     original_price: 0,
-    images: '',
+    images: [] as string[],
     meta_title: '',
     meta_description: '',
     meta_keywords: '',
@@ -330,7 +339,9 @@ function ProductFormModal({
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-
+  const [mode, setMode] = useState<'edit' | 'preview'>(product ? 'preview' : 'edit');
+  const formRef = useRef<HTMLFormElement>(null);
+  const categoryName = categories.find(c => String(c.id) === String(form.category_id))?.name || '';
   useEffect(() => {
     if (product) {
       fetch(`/api/products/${product.id}`)
@@ -347,7 +358,7 @@ function ProductFormModal({
               category_id: p.category_id || '',
               price: p.price || 0,
               original_price: p.original_price || 0,
-              images: imgs.join('\n'),
+              images: imgs,
               meta_title: p.meta_title || '',
               meta_description: p.meta_description || '',
               meta_keywords: p.meta_keywords || '',
@@ -364,15 +375,15 @@ function ProductFormModal({
     setSaving(true);
     setError('');
 
-    const images = form.images.split('\n').map((s) => s.trim()).filter(Boolean);
-    const payload = { ...form, images, price: Number(form.price), original_price: Number(form.original_price) };
+    const payload = { ...form, images: form.images, price: Number(form.price), original_price: Number(form.original_price) };
 
     try {
       const url = product ? `/api/products/${product.id}` : '/api/products';
       const method = product ? 'PUT' : 'POST';
+      const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null;
       const res = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         body: JSON.stringify(payload),
       });
 
@@ -390,165 +401,226 @@ function ProductFormModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-10 overflow-y-auto">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl mx-4 mb-10">
-        <div className="flex items-center justify-between px-6 py-4 border-b">
-          <h2 className="text-lg font-semibold">{product ? 'Edit Product' : 'Add Product'}</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+    <div className="fixed inset-0 z-50 bg-gray-100 flex flex-col">
+      {/* Top Bar */}
+      <div className="bg-white border-b px-6 py-3 flex items-center justify-between flex-shrink-0">
+        <div className="flex items-center space-x-4">
+          <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-700 transition">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
+          <div>
+            <h1 className="text-lg font-semibold text-gray-900">{form.name || 'New Product'}</h1>
+            {form.sku && <span className="text-xs text-gray-400 font-mono">SKU: {form.sku}</span>}
+          </div>
         </div>
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">SKU *</label>
-              <input
-                type="text" required value={form.sku}
-                onChange={(e) => setForm({ ...form, sku: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg text-sm"
-                placeholder="e.g., ELV-DOOR-001"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
-              <input
-                type="text" required value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg text-sm"
-                placeholder="Product name"
-              />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-              <select
-                value={form.category_id}
-                onChange={(e) => setForm({ ...form, category_id: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg text-sm"
-              >
-                <option value="">-- Select --</option>
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Price</label>
-                <input
-                  type="number" step="0.01" value={form.price}
-                  onChange={(e) => setForm({ ...form, price: parseFloat(e.target.value) || 0 })}
-                  className="w-full px-3 py-2 border rounded-lg text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Original</label>
-                <input
-                  type="number" step="0.01" value={form.original_price}
-                  onChange={(e) => setForm({ ...form, original_price: parseFloat(e.target.value) || 0 })}
-                  className="w-full px-3 py-2 border rounded-lg text-sm"
-                />
-              </div>
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Short Description</label>
-            <input
-              type="text" value={form.short_description}
-              onChange={(e) => setForm({ ...form, short_description: e.target.value })}
-              className="w-full px-3 py-2 border rounded-lg text-sm"
-              placeholder="Brief product description"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-            <textarea
-              rows={4} value={form.description}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
-              className="w-full px-3 py-2 border rounded-lg text-sm"
-              placeholder="Detailed product description (HTML supported)"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Image URLs (one per line)</label>
-            <textarea
-              rows={3} value={form.images}
-              onChange={(e) => setForm({ ...form, images: e.target.value })}
-              className="w-full px-3 py-2 border rounded-lg text-sm font-mono"
-              placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg"
-            />
-          </div>
-
-          {/* SEO Fields */}
-          <div className="border-t pt-4">
-            <h3 className="text-sm font-semibold text-gray-900 mb-3">SEO Settings</h3>
-            <div className="space-y-3">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Meta Title</label>
-                <input
-                  type="text" value={form.meta_title}
-                  onChange={(e) => setForm({ ...form, meta_title: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg text-sm"
-                  placeholder="SEO title (auto-generated from name if empty)"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Meta Description</label>
-                <textarea
-                  rows={2} value={form.meta_description}
-                  onChange={(e) => setForm({ ...form, meta_description: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg text-sm"
-                  placeholder="SEO description (max 160 chars)"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Meta Keywords</label>
-                <input
-                  type="text" value={form.meta_keywords}
-                  onChange={(e) => setForm({ ...form, meta_keywords: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg text-sm"
-                  placeholder="keyword1, keyword2, keyword3"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-6">
-            <label className="flex items-center space-x-2">
-              <input
-                type="checkbox" checked={form.is_active === 1}
-                onChange={(e) => setForm({ ...form, is_active: e.target.checked ? 1 : 0 })}
-                className="rounded"
-              />
-              <span className="text-sm text-gray-700">Active</span>
-            </label>
-            <label className="flex items-center space-x-2">
-              <input
-                type="checkbox" checked={form.is_featured === 1}
-                onChange={(e) => setForm({ ...form, is_featured: e.target.checked ? 1 : 0 })}
-                className="rounded"
-              />
-              <span className="text-sm text-gray-700">Featured</span>
-            </label>
-          </div>
-
-          {error && <div className="text-red-600 text-sm bg-red-50 px-4 py-2 rounded-lg">{error}</div>}
-
-          <div className="flex justify-end space-x-3 pt-4 border-t">
-            <button type="button" onClick={onClose} className="px-4 py-2 border rounded-lg text-sm hover:bg-gray-50">
-              Cancel
+        <div className="flex items-center space-x-3">
+          {/* Mode Toggle */}
+          <div className="flex bg-gray-100 rounded-lg p-0.5">
+            <button
+              type="button"
+              onClick={() => setMode('preview')}
+              className={`px-3 py-1.5 text-sm font-medium rounded-md transition ${mode === 'preview' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+            >
+              Preview
             </button>
             <button
-              type="submit" disabled={saving}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50"
+              type="button"
+              onClick={() => setMode('edit')}
+              className={`px-3 py-1.5 text-sm font-medium rounded-md transition ${mode === 'edit' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+            >
+              Edit
+            </button>
+          </div>
+          {mode === 'edit' && (
+            <button
+              type="button"
+              disabled={saving}
+              onClick={() => formRef.current?.requestSubmit()}
+              className="px-5 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition"
             >
               {saving ? 'Saving...' : product ? 'Update' : 'Create'}
             </button>
+          )}
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto">
+        {mode === 'preview' ? (
+          /* ===== PREVIEW MODE ===== */
+          <div className="max-w-5xl mx-auto p-6 space-y-6">
+            {/* Images */}
+            {form.images.length > 0 && (
+              <div className="bg-white rounded-xl shadow-sm border p-6">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {form.images.map((url, i) => (
+                    <div key={i} className="aspect-[4/3] bg-gray-50 border rounded-lg overflow-hidden">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={url} alt={`Image ${i + 1}`} className="w-full h-full object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Product Header */}
+            <div className="bg-white rounded-xl shadow-sm border p-6">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">{form.name || 'Untitled Product'}</h2>
+                  {form.sku && <p className="text-sm text-gray-400 font-mono mt-1">SKU: {form.sku}</p>}
+                  {categoryName && (
+                    <span className="inline-block mt-2 px-2.5 py-0.5 bg-blue-50 text-blue-700 text-xs font-medium rounded-full">
+                      {categoryName}
+                    </span>
+                  )}
+                </div>
+                <div className="text-right">
+                  {form.price > 0 && <div className="text-2xl font-bold text-gray-900">${form.price.toFixed(2)}</div>}
+                  {form.original_price > 0 && form.original_price !== form.price && (
+                    <div className="text-sm text-gray-400 line-through">${form.original_price.toFixed(2)}</div>
+                  )}
+                </div>
+              </div>
+              {form.short_description && <p className="text-gray-600 mt-4">{form.short_description}</p>}
+              <div className="flex items-center space-x-3 mt-4">
+                <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${form.is_active ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                  {form.is_active ? 'Active' : 'Inactive'}
+                </span>
+                {form.is_featured === 1 && (
+                  <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-yellow-50 text-yellow-700">Featured</span>
+                )}
+              </div>
+            </div>
+
+            {/* Description */}
+            {form.description && (
+              <div className="bg-white rounded-xl shadow-sm border p-6">
+                <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Description</h3>
+                <MarkdownContent content={form.description} />
+              </div>
+            )}
+
+            {/* SEO Preview */}
+            {(form.meta_title || form.name) && (
+              <div className="bg-white rounded-xl shadow-sm border p-6">
+                <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Google Preview</h3>
+                <div className="border rounded-lg p-4 bg-gray-50">
+                  <div className="text-[#1a0dab] text-lg leading-tight">{form.meta_title || form.name}</div>
+                  <div className="text-[#006621] text-sm mt-1">
+                    gallopliftparts.com/product/{form.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}
+                  </div>
+                  <div className="text-[#545454] text-sm mt-1 line-clamp-2">
+                    {form.meta_description || form.short_description || 'No description set.'}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-        </form>
+        ) : (
+          /* ===== EDIT MODE ===== */
+          <form ref={formRef} onSubmit={handleSubmit} className="max-w-5xl mx-auto p-6 space-y-6">
+            {/* Basic Info Card */}
+            <div className="bg-white rounded-xl shadow-sm border p-6">
+              <h3 className="text-sm font-semibold text-gray-900 mb-4">Basic Information</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">SKU *</label>
+                  <input type="text" required value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} className="w-full px-3 py-2 border rounded-lg text-sm" placeholder="e.g., ELV-DOOR-001" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
+                  <input type="text" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="w-full px-3 py-2 border rounded-lg text-sm" placeholder="Product name" />
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-4 mt-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                  <select value={form.category_id} onChange={(e) => setForm({ ...form, category_id: e.target.value })} className="w-full px-3 py-2 border rounded-lg text-sm">
+                    <option value="">-- Select --</option>
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Price</label>
+                  <input type="number" step="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: parseFloat(e.target.value) || 0 })} className="w-full px-3 py-2 border rounded-lg text-sm" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Original Price</label>
+                  <input type="number" step="0.01" value={form.original_price} onChange={(e) => setForm({ ...form, original_price: parseFloat(e.target.value) || 0 })} className="w-full px-3 py-2 border rounded-lg text-sm" />
+                </div>
+              </div>
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Short Description</label>
+                <input type="text" value={form.short_description} onChange={(e) => setForm({ ...form, short_description: e.target.value })} className="w-full px-3 py-2 border rounded-lg text-sm" placeholder="Brief product description" />
+              </div>
+              <div className="flex items-center space-x-6 mt-4">
+                <label className="flex items-center space-x-2">
+                  <input type="checkbox" checked={form.is_active === 1} onChange={(e) => setForm({ ...form, is_active: e.target.checked ? 1 : 0 })} className="rounded" />
+                  <span className="text-sm text-gray-700">Active</span>
+                </label>
+                <label className="flex items-center space-x-2">
+                  <input type="checkbox" checked={form.is_featured === 1} onChange={(e) => setForm({ ...form, is_featured: e.target.checked ? 1 : 0 })} className="rounded" />
+                  <span className="text-sm text-gray-700">Featured</span>
+                </label>
+              </div>
+            </div>
+
+            {/* Description Card */}
+            <div className="bg-white rounded-xl shadow-sm border p-6">
+              <RichEditor
+                label="Description"
+                value={form.description}
+                onChange={(v) => setForm({ ...form, description: v })}
+                placeholder="Product description - supports Markdown"
+                height={400}
+              />
+            </div>
+
+            {/* Images Card */}
+            <div className="bg-white rounded-xl shadow-sm border p-6">
+              <h3 className="text-sm font-semibold text-gray-900 mb-4">Images</h3>
+              <ImagePicker
+                selected={form.images}
+                onChange={(imgs) => setForm({ ...form, images: imgs })}
+              />
+            </div>
+
+            {/* SEO Card */}
+            <div className="bg-white rounded-xl shadow-sm border p-6">
+              <h3 className="text-sm font-semibold text-gray-900 mb-4">SEO Settings</h3>
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Meta Title</label>
+                  <input type="text" value={form.meta_title} onChange={(e) => setForm({ ...form, meta_title: e.target.value })} className="w-full px-3 py-2 border rounded-lg text-sm" placeholder="SEO title (auto-generated from name if empty)" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Meta Description</label>
+                  <textarea rows={2} value={form.meta_description} onChange={(e) => setForm({ ...form, meta_description: e.target.value })} className="w-full px-3 py-2 border rounded-lg text-sm" placeholder="SEO description (max 160 chars)" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Meta Keywords</label>
+                  <input type="text" value={form.meta_keywords} onChange={(e) => setForm({ ...form, meta_keywords: e.target.value })} className="w-full px-3 py-2 border rounded-lg text-sm" placeholder="keyword1, keyword2, keyword3" />
+                </div>
+              </div>
+            </div>
+
+            {error && <div className="text-red-600 text-sm bg-red-50 px-4 py-3 rounded-xl">{error}</div>}
+
+            <div className="flex justify-end pb-6">
+              <button
+                type="submit" disabled={saving}
+                className="px-8 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition"
+              >
+                {saving ? 'Saving...' : product ? 'Update Product' : 'Create Product'}
+              </button>
+            </div>
+          </form>
+        )}
       </div>
     </div>
   );

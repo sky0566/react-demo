@@ -13,14 +13,14 @@ export const dynamic = 'force-dynamic';
 
 // Category images from the original site
 const categoryImages: Record<string, string> = {
-  elevator: 'https://www.gallopliftparts.com/wp-content/uploads/2024/04/selcom-door.jpg',
-  escalator: 'https://www.gallopliftparts.com/wp-content/uploads/2024/05/escalator-step-7.png',
-  selcom: 'https://www.gallopliftparts.com/wp-content/uploads/2024/04/selcom-landing-door-right.jpg',
-  fermator: 'https://www.gallopliftparts.com/wp-content/uploads/2024/04/door-controller-vf4.png',
-  kone: 'https://www.gallopliftparts.com/wp-content/uploads/2024/04/KM601370-1.webp',
-  sword: 'https://www.gallopliftparts.com/wp-content/uploads/2024/04/door-inverter-easy-con-1.webp',
-  canny: 'https://www.gallopliftparts.com/wp-content/uploads/2024/04/elevator-integrated-door-knife-xd-cs01-3.webp',
-  mitsubishi: 'https://www.gallopliftparts.com/wp-content/uploads/2024/11/ZR236-11-1.webp',
+  elevator: '/images/wp/2024/04/selcom-door.jpg',
+  escalator: '/images/wp/2024/05/escalator-step-7.png',
+  selcom: '/images/wp/2024/04/selcom-landing-door-right.jpg',
+  fermator: '/images/wp/2024/04/door-controller-vf4.png',
+  kone: '/images/wp/2024/04/KM601370-1.webp',
+  sword: '/images/wp/2024/04/door-inverter-easy-con-1.webp',
+  canny: '/images/wp/2024/04/elevator-integrated-door-knife-xd-cs01-3.webp',
+  mitsubishi: '/images/wp/2024/11/ZR236-11-1.webp',
 };
 
 export default function ProductsPage() {
@@ -86,12 +86,12 @@ export default function ProductsPage() {
               href={`/products/${cat.slug}`}
               className="group product-card flex flex-col"
             >
-              <div className="aspect-square bg-white overflow-hidden relative">
+              <div className="aspect-[4/3] bg-white overflow-hidden relative">
                 <Image
                   src={categoryImages[cat.slug] || '/placeholder-product.svg'}
                   alt={cat.name}
                   fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  className="object-cover"
                   sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                 />
                 {/* Brand logo thumbnail */}
@@ -102,6 +102,7 @@ export default function ProductsPage() {
                       alt={`${cat.name} logo`}
                       width={48}
                       height={24}
+                      unoptimized={cat.logo.endsWith('.svg')}
                       className="h-6 w-auto object-contain"
                     />
                   </div>

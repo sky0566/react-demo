@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { SingleImagePicker } from '@/components/ImagePicker';
 
 interface Category {
   id: string;
@@ -20,6 +21,11 @@ export default function AdminCategoriesPage() {
   const [editing, setEditing] = useState<Category | null>(null);
   const [form, setForm] = useState({ name: '', slug: '', description: '', image: '', logo: '', sort_order: 0 });
 
+  const getAuthHeaders = () => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null;
+    return { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) };
+  };
+
   const fetchCategories = async () => {
     setLoading(true);
     const res = await fetch('/api/categories');
@@ -38,7 +44,7 @@ export default function AdminCategoriesPage() {
     const method = editing ? 'PUT' : 'POST';
     await fetch(url, {
       method,
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify(form),
     });
     setShowForm(false);
@@ -49,7 +55,7 @@ export default function AdminCategoriesPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this category?')) return;
-    await fetch(`/api/categories/${id}`, { method: 'DELETE' });
+    await fetch(`/api/categories/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
     fetchCategories();
   };
 
@@ -101,28 +107,20 @@ export default function AdminCategoriesPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
-              <input
-                type="text" value={form.image}
-                onChange={(e) => setForm({ ...form, image: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg text-sm"
+              <SingleImagePicker
+                label="Image URL"
+                value={form.image}
+                onChange={(url) => setForm({ ...form, image: url })}
                 placeholder="Category cover image URL"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Logo URL</label>
-              <div className="flex gap-2">
-                <input
-                  type="text" value={form.logo}
-                  onChange={(e) => setForm({ ...form, logo: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg text-sm"
-                  placeholder="Brand logo URL (shown in nav dropdown)"
-                />
-                {form.logo && (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img src={form.logo} alt="preview" className="h-9 w-auto object-contain border rounded p-0.5" />
-                )}
-              </div>
+              <SingleImagePicker
+                label="Logo URL"
+                value={form.logo}
+                onChange={(url) => setForm({ ...form, logo: url })}
+                placeholder="Brand logo URL (shown in nav dropdown)"
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Sort Order</label>

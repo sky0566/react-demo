@@ -26,6 +26,8 @@ export default function AdminLoginPage() {
 
       if (res.ok) {
         localStorage.setItem('admin_token', data.token);
+        // Set cookie for middleware route protection
+        document.cookie = `admin_token=${data.token}; path=/; max-age=${8 * 60 * 60}; SameSite=Strict`;
         if (data.mustChangePassword) {
           router.push('/admin/settings');
         } else {

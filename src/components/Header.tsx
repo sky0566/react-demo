@@ -9,7 +9,6 @@ const navigation = [
   { name: 'Home', href: '/' },
   { name: 'Product', href: '/products', hasDropdown: true },
   { name: 'News', href: '/news' },
-  { name: 'Company', href: '/company' },
   { name: 'About Us', href: '/about' },
   { name: 'Contact Us', href: '/contact' },
 ];
@@ -102,21 +101,21 @@ export default function Header() {
       {/* Main Header - Sticky */}
       <header className={`bg-white sticky top-0 z-50 header-main ${scrolled ? 'shadow-md' : 'shadow-sm'}`}>
         <div className="max-w-[1290px] mx-auto px-6">
-          <div className={`flex justify-between items-center transition-all duration-300 ${scrolled ? 'h-[70px]' : 'h-[90px]'}`}>
+          <div className="flex justify-between items-center h-[70px]">
             {/* Logo */}
             <Link href="/" className="flex items-center flex-shrink-0">
               <Image
-                src="https://www.gallopliftparts.com/wp-content/uploads/2024/03/logo-text.png"
+                src="/images/wp/2024/03/logo-text.png"
                 alt="Gallop Lift Parts"
                 width={200}
                 height={55}
-                className={`transition-all duration-300 ${scrolled ? 'h-[45px] w-auto' : 'h-[55px] w-auto'}`}
+                className="h-[45px] w-auto"
                 priority
               />
             </Link>
 
             {/* Desktop Navigation - centered */}
-            <nav className="hidden lg:flex items-center gap-1">
+            <nav className="hidden lg:flex items-center gap-2">
               {navigation.map((item) =>
                 item.hasDropdown ? (
                   <div
@@ -128,7 +127,7 @@ export default function Header() {
                   >
                     <Link
                       href={item.href}
-                      className="px-5 py-2 text-[#222] hover:text-[#046db1] font-medium transition-colors text-[15px] relative inline-flex items-center gap-1"
+                      className="px-5 py-2 text-[#222] hover:text-[#046db1] font-medium transition-colors text-[16px] relative inline-flex items-center gap-1"
                     >
                       {item.name}
                       <svg className={`w-3.5 h-3.5 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
@@ -151,6 +150,7 @@ export default function Header() {
                                   alt={cat.name}
                                   width={32}
                                   height={24}
+                                  unoptimized={cat.logo.endsWith('.svg')}
                                   className="w-8 h-6 object-contain flex-shrink-0"
                                 />
                               ) : (
@@ -171,7 +171,7 @@ export default function Header() {
                   <Link
                     key={item.name}
                     href={item.href}
-                    className="px-5 py-2 text-[#222] hover:text-[#046db1] font-medium transition-colors text-[15px] relative"
+                    className="px-5 py-2 text-[#222] hover:text-[#046db1] font-medium transition-colors text-[16px] relative"
                   >
                     {item.name}
                   </Link>
@@ -238,7 +238,7 @@ export default function Header() {
                               onClick={() => setMobileMenuOpen(false)}
                             >
                               {cat.logo && (
-                                <Image src={cat.logo} alt={cat.name} width={28} height={20} className="w-7 h-5 object-contain" />
+                                <Image src={cat.logo} alt={cat.name} width={28} height={20} unoptimized={cat.logo.endsWith('.svg')} className="w-7 h-5 object-contain" />
                               )}
                               {cat.name}
                             </Link>

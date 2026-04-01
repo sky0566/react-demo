@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
+import { requireAdmin } from '@/lib/auth';
 
-// GET /api/inquiries/[id]
+// GET /api/inquiries/[id] (admin only)
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = requireAdmin(request);
+  if (auth instanceof NextResponse) return auth;
   try {
     const { id } = await params;
     const db = getDb();
@@ -27,11 +30,13 @@ export async function GET(
   }
 }
 
-// PATCH /api/inquiries/[id] — update status or fields
+// PATCH /api/inquiries/[id] — update status or fields (admin only)
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = requireAdmin(request);
+  if (auth instanceof NextResponse) return auth;
   try {
     const { id } = await params;
     const db = getDb();
@@ -68,11 +73,13 @@ export async function PATCH(
   }
 }
 
-// DELETE /api/inquiries/[id]
+// DELETE /api/inquiries/[id] (admin only)
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = requireAdmin(request);
+  if (auth instanceof NextResponse) return auth;
   try {
     const { id } = await params;
     const db = getDb();
