@@ -8,9 +8,10 @@ import { useCart } from './CartProvider';
 const navigation = [
   { name: 'Home', href: '/' },
   { name: 'Product', href: '/products', hasDropdown: true },
+  { name: 'Support', href: '/support' },
+  { name: 'Company', href: '/about' },
+  { name: 'Contact', href: '/contact' },
   { name: 'News', href: '/news' },
-  { name: 'About Us', href: '/about' },
-  { name: 'Contact Us', href: '/contact' },
 ];
 
 interface DropdownCategory {

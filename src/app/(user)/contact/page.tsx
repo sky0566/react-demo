@@ -1,6 +1,5 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import MapWrapper from '@/components/MapWrapper';
 import QuoteForm from '@/components/QuoteForm';
 
 export const metadata: Metadata = {
@@ -129,16 +128,7 @@ export default function ContactPage() {
               <QuoteForm />
             </div>
 
-            {/* Map */}
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-              <div className="p-6 pb-0">
-                <h2 className="text-[22px] font-bold text-[#222] mb-1">Our Location</h2>
-                <p className="text-[#888] text-[14px] mb-4">No.128 Jinji Lake Road, SIP, Suzhou, China</p>
-              </div>
-              <div className="h-[350px]">
-                <MapWrapper />
-              </div>
-            </div>
+
           </div>
         </div>
       </div>

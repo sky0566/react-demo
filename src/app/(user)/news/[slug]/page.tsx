@@ -64,16 +64,16 @@ export default async function NewsDetailPage({ params }: Props) {
 
       <article className="max-w-[900px] mx-auto px-6 py-8 lg:py-12">
         {/* Header */}
-        <div className="mb-8">
-          <span className="text-[13px] text-[#2B6CB0] font-semibold uppercase tracking-wide">{article.category}</span>
-          <h1 className="mt-2 text-[32px] font-bold text-[#222] leading-tight">{article.title}</h1>
-          <p className="mt-3 text-[14px] text-[#888]">{formatDate(article.created_at)}</p>
+        <div className="mb-6">
+          <span className="text-[12px] text-[#2B6CB0] font-semibold uppercase tracking-wide">{article.category}</span>
+          <h1 className="mt-2 text-[28px] font-bold text-[#222] leading-tight">{article.title}</h1>
+          <p className="mt-2 text-[13px] text-[#888]">{formatDate(article.created_at)}</p>
         </div>
 
         {/* Featured Image */}
         {article.image && (
-          <div className="mb-8 rounded-xl overflow-hidden relative" style={{ height: '400px' }}>
-            <Image src={article.image} alt={article.title} fill className="object-cover" sizes="900px" priority />
+          <div className="mb-8 overflow-hidden relative">
+            <Image src={article.image} alt={article.title} width={900} height={500} className="w-full h-auto object-cover" sizes="900px" priority />
           </div>
         )}
 

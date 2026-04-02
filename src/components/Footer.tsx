@@ -38,9 +38,9 @@ export default function Footer() {
             </div>
 
             {/* Products */}
-            <div className="flex flex-col items-center md:items-center">
+            <div className="flex flex-col items-start">
               <h3 className="text-[#222] font-semibold text-[18px] mb-5">Products</h3>
-              <ul className="space-y-2 text-center">
+              <ul className="space-y-2">
                 {categories.map((cat) => (
                   <li key={cat}>
                     <Link

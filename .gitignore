@@ -53,6 +53,8 @@ tmp_*.html
 # migration scripts (one-time use)
 scripts/migrate-wp-images.js
 scripts/count-wp-images.js
-
-# WP images (too large for git, host separately)
-/public/images/wp/
+scripts/check-wp-urls.js
+scripts/fix-wp-desc-urls.js
+scripts/fix-remaining-urls.js
+scripts/fix-final-urls.js
+scripts/check-remaining.js
