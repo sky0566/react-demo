@@ -153,6 +153,37 @@ a {
   padding: 4px 0;
 }
 
+/* WordPress Block Gallery (nested <figure> pattern) */
+figure > figure {
+  margin: 0;
+}
+figure:has(> figure) {
+  display: grid;
+  gap: 8px;
+  margin: 16px 0;
+  grid-template-columns: repeat(2, 1fr);
+}
+figure:has(> figure:nth-child(3)) {
+  grid-template-columns: repeat(3, 1fr);
+}
+figure:has(> figure:nth-child(4)) {
+  grid-template-columns: repeat(4, 1fr);
+}
+@media (max-width: 640px) {
+  figure:has(> figure:nth-child(3)),
+  figure:has(> figure:nth-child(4)) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+figure > figure img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 0;
+  box-shadow: none;
+  max-height: none;
+}
+
 /* Product card WooCommerce style */
 .product-card {
   background: #fff;

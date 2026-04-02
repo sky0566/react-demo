@@ -54,6 +54,11 @@ tmp_*.html
 scripts/migrate-wp-images.js
 scripts/count-wp-images.js
 scripts/check-wp-urls.js
+scripts/check-wp-article.js
+scripts/fix-wp-desc-urls.js
+scripts/fix-remaining-urls.js
+scripts/resync-news.js
+scripts/check-wp-urls.js
 scripts/fix-wp-desc-urls.js
 scripts/fix-remaining-urls.js
 scripts/fix-final-urls.js
